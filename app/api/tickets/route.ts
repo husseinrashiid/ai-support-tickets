@@ -64,8 +64,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // The ticket is already saved at this point — an AI failure below must
-  // never lose it. analyzeTicket() never throws; it returns { ok: false }.
+  // The ticket is already saved at this point,an AI failure below must never lose it. analyzeTicket() never throws;instead it will return { ok: false }.
   const analysis = await analyzeTicket(ticket.title, ticket.message);
 
   const updateData = analysis.ok
@@ -79,7 +78,8 @@ export async function POST(request: NextRequest) {
         aiSummary:
           "AI analysis could not be completed. The ticket was saved without AI-generated information.",
       };
-
+  
+//try and catch for failure
   let finalTicket = ticket;
   try {
     finalTicket = await prisma.ticket.update({
