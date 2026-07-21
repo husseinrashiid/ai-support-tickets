@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { analyzeTicket } from "@/lib/ai";
 
 export async function GET() {
   try {
@@ -46,17 +47,15 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  let ticket;
   try {
-    const ticket = await prisma.ticket.create({
+    ticket = await prisma.ticket.create({
       data: {
         title: title.trim(),
         message: message.trim(),
         status: "Open",
       },
     });
-    // AI analysis (summary,category,priority,suggested response) is triggered separately once the AI service is wired up 
-    // the ticketmust be saved successfully even if later call fails.
-    return NextResponse.json({ ticket }, { status: 201 });
   } catch (error) {
     console.error("POST /api/tickets failed:", error);
     return NextResponse.json(
@@ -64,4 +63,32 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+
+  // The ticket is already saved at this point — an AI failure below must
+  // never lose it. analyzeTicket() never throws; it returns { ok: false }.
+  const analysis = await analyzeTicket(ticket.title, ticket.message);
+
+  const updateData = analysis.ok
+    ? {
+        aiSummary: analysis.data.summary,
+        category: analysis.data.category,
+        priority: analysis.data.priority,
+        aiSuggestedResponse: analysis.data.suggestedResponse,
+      }
+    : {
+        aiSummary:
+          "AI analysis could not be completed. The ticket was saved without AI-generated information.",
+      };
+
+  let finalTicket = ticket;
+  try {
+    finalTicket = await prisma.ticket.update({
+      where: { id: ticket.id },
+      data: updateData,
+    });
+  } catch (error) {
+    console.error(`Failed to save AI analysis for ticket ${ticket.id}:`, error);
+  }
+
+  return NextResponse.json({ ticket: finalTicket }, { status: 201 });
 }
