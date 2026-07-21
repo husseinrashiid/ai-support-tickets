@@ -1,0 +1,148 @@
+import Anthropic from "@anthropic-ai/sdk";
+import supportArticles from "./support-articles.json";
+import {
+  TICKET_CATEGORIES,
+  TICKET_PRIORITIES,
+  TicketCategory,
+  TicketPriority,
+} from "./constants";
+
+const client = new Anthropic();
+
+export type AiAnalysis = {
+  summary: string;
+  category: TicketCategory;
+  priority: TicketPriority;
+  suggestedResponse: string;
+};
+
+export type AiAnalysisResult =
+  | { ok: true; data: AiAnalysis }
+  | { ok: false; error: string };
+
+const RESPONSE_SCHEMA = {
+  type: "object",
+  properties: {
+    summary: {
+      type: "string",
+      description: "One or two sentence summary of the customer's main issue.",
+    },
+    category: { type: "string", enum: [...TICKET_CATEGORIES] },
+    priority: { type: "string", enum: [...TICKET_PRIORITIES] },
+    suggestedResponse: {
+      type: "string",
+      description: "A short, professional reply the support agent can review and send.",
+    },
+  },
+  required: ["summary", "category", "priority", "suggestedResponse"],
+  additionalProperties: false,
+} as const;
+
+function buildSystemPrompt(): string {
+  const articles = (supportArticles as { title: string; category: string; content: string }[])
+    .map((article) => `Title: ${article.title}\nCategory: ${article.category}\nContent: ${article.content}`)
+    .join("\n\n");
+
+  return `You are an assistant helping a customer support team triage incoming support tickets.
+
+Given a customer's ticket title and message, analyze it and produce exactly these four fields:
+
+- summary: a one- or two-sentence summary of the customer's main issue.
+- category: the single best-fitting category, chosen from exactly these six values: "Technical Issue", "Billing", "Account Access", "Feature Request", "General Question", "Other".
+- priority: how urgently this ticket needs attention, chosen from exactly these four values: "Low", "Medium", "High", "Urgent".
+- suggestedResponse: a short, professional reply the support agent can review, edit, and send to the customer. When one of the reference articles below is relevant, use it to ground the reply (e.g. point the customer toward the right steps) - but write a natural reply, don't quote the article verbatim.
+
+Reference support articles:
+
+${articles}
+
+Respond with only a JSON object matching this exact shape - no prose, no markdown code fences, no explanation before or after:
+{"summary": "...", "category": "...", "priority": "...", "suggestedResponse": "..."}`;
+}
+
+export async function analyzeTicket(title: string, message: string): Promise<AiAnalysisResult> {
+  let response;
+  try {
+    response = await client.messages.create(
+      {
+        model: "claude-haiku-4-5",
+        max_tokens: 1024,
+        system: buildSystemPrompt(),
+        messages: [
+          {
+            role: "user",
+            content: `Ticket title: ${title}\n\nCustomer message: ${message}`,
+          },
+        ],
+        output_config: {
+          format: { type: "json_schema", schema: RESPONSE_SCHEMA },
+        },
+      },
+      { timeout: 30_000 }
+    );
+  } catch (error) {
+    console.error("AI analysis request failed:", error);
+    return { ok: false, error: "The AI request failed or the AI service is unavailable." };
+  }
+
+  if (response.stop_reason === "refusal") {
+    return { ok: false, error: "The AI declined to analyze this ticket." };
+  }
+
+  const textBlock = response.content.find((block) => block.type === "text");
+  if (!textBlock || textBlock.type !== "text") {
+    return { ok: false, error: "The AI response did not contain any text." };
+  }
+
+  let parsed: unknown;
+  try {
+    const raw = textBlock.text
+      .trim()
+      .replace(/^```(?:json)?/, "")
+      .replace(/```$/, "")
+      .trim();
+    parsed = JSON.parse(raw);
+  } catch (error) {
+    console.error("Failed to parse AI response as JSON:", error, textBlock.text);
+    return { ok: false, error: "The AI response could not be parsed." };
+  }
+
+  return validateAnalysis(parsed);
+}
+
+function validateAnalysis(value: unknown): AiAnalysisResult {
+  if (typeof value !== "object" || value === null) {
+    return { ok: false, error: "The AI response was not a JSON object." };
+  }
+
+  const { summary, category, priority, suggestedResponse } = value as Record<string, unknown>;
+
+  if (typeof summary !== "string" || summary.trim().length === 0) {
+    return { ok: false, error: "The AI response is missing a valid summary." };
+  }
+  if (
+    typeof category !== "string" ||
+    !(TICKET_CATEGORIES as readonly string[]).includes(category)
+  ) {
+    return { ok: false, error: "The AI response is missing a valid category." };
+  }
+  if (
+    typeof priority !== "string" ||
+    !(TICKET_PRIORITIES as readonly string[]).includes(priority)
+  ) {
+    return { ok: false, error: "The AI response is missing a valid priority." };
+  }
+  if (typeof suggestedResponse !== "string" || suggestedResponse.trim().length === 0) {
+    return { ok: false, error: "The AI response is missing a valid suggested response." };
+  }
+
+  return {
+    ok: true,
+    data: {
+      summary,
+      category: category as TicketCategory,
+      priority: priority as TicketPriority,
+      suggestedResponse,
+    },
+  };
+}
