@@ -1,0 +1,32 @@
+[
+  {
+    "id": "1",
+    "title": "How to reset your password",
+    "category": "Account Access",
+    "content": "To reset your password, go to the login page and click 'Forgot Password.' Enter your registered email address or phone number and you'll receive a reset link within a few minutes. Click the link and choose a new password. If you don't see an email, check your spam folder."
+  },
+  {
+    "id": "2",
+    "title": "How to update billing information",
+    "category": "Billing",
+    "content": "To update your billing details, go to Account Settings > Billing. You can update your card number, expiration date, and billing address. Changes take effect immediately for future charges."
+  },
+  {
+    "id": "3",
+    "title": "How to cancel a subscription",
+    "category": "Billing",
+    "content": "To cancel your subscription, go to Account Settings > Subscription and click 'Cancel Plan.' Your access will continue until the end of the current billing period, and you won't be charged again."
+  },
+  {
+    "id": "4",
+    "title": "How to troubleshoot login problems",
+    "category": "Account Access",
+    "content": "If you can't log in, first confirm you're using the correct email address. Try resetting your password. If the issue persists, clear your browser cache or try a different browser. Contact support if you still can't access your account."
+  },
+  {
+    "id": "5",
+    "title": "How to contact technical support",
+    "category": "Technical Issue",
+    "content": "You can reach technical support via the in-app chat widget, or by emailing example@company.com. Include your account email and a description of the issue for faster resolution."
+  }
+]
