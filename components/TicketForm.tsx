@@ -51,7 +51,7 @@ export function TicketForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-5 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-black/30"
+      className="flex flex-col gap-5 rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900"
     >
       <div className="flex flex-col gap-2">
         <label
@@ -69,11 +69,8 @@ export function TicketForm() {
           onChange={(event) => setTitle(event.target.value)}
           disabled={submitting}
           placeholder="Short summary of the issue"
-          className="rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/30 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
+          className="rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition-colors focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/30 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
         />
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          A short summary of the issue, shown in the ticket list.
-        </p>
       </div>
 
       <div className="flex flex-col gap-2">
@@ -92,7 +89,7 @@ export function TicketForm() {
           onChange={(event) => setMessage(event.target.value)}
           disabled={submitting}
           placeholder="Describe the customer's issue in detail"
-          className="resize-y rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/30 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
+          className="resize-y rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition-colors focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/30 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
         />
         <p className="text-xs text-zinc-500 dark:text-zinc-400">
           The full customer message. This is what the AI analysis reads to
