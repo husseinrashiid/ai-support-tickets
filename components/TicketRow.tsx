@@ -19,7 +19,7 @@ export function TicketRow({ ticket }: { ticket: Ticket }) {
     <li>
       <Link
         href={`/tickets/${ticket.id}`}
-        className={`flex items-center gap-4 border-l-4 px-5 py-4 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 ${priorityStyle.border} ${
+        className={`flex items-center gap-4 border-l-4 px-5 py-3 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 ${priorityStyle.border} ${
           isClosed ? "opacity-60" : ""
         }`}
       >
@@ -30,9 +30,7 @@ export function TicketRow({ ticket }: { ticket: Ticket }) {
           <p className="mt-0.5 truncate text-xs text-zinc-500 dark:text-zinc-400">
             {ticket.category ?? "Uncategorized"}
             {" · "}
-            <span className={priorityStyle.text}>
-              {ticket.priority ?? "Unclassified"}
-            </span>
+            <span>{ticket.priority ?? "Unclassified"}</span>
           </p>
         </div>
         <div className={`flex shrink-0 items-center gap-1.5 text-sm ${statusStyle.text}`}>
