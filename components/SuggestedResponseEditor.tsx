@@ -12,12 +12,9 @@ export function SuggestedResponseEditor({
 }) {
   const router = useRouter();
   const [value, setValue] = useState(initialValue);
-  const [savedValue, setSavedValue] = useState(initialValue);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedJustNow, setSavedJustNow] = useState(false);
-
-  const isDirty = value !== savedValue;
 
   async function handleSave() {
     setSaving(true);
@@ -38,7 +35,6 @@ export function SuggestedResponseEditor({
         return;
       }
 
-      setSavedValue(value);
       setSaving(false);
       setSavedJustNow(true);
       router.refresh();
@@ -49,16 +45,16 @@ export function SuggestedResponseEditor({
   }
 
   return (
-    <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-black/30">
+    <section className="rounded-2xl border-2 border-brand-blue/30 bg-white p-5 dark:border-brand-blue/30 dark:bg-zinc-900">
       <div className="flex items-center justify-between gap-4">
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
           Suggested response
         </h2>
         <button
           type="button"
           onClick={handleSave}
-          disabled={saving || !isDirty}
-          className="shrink-0 rounded-full bg-brand-blue px-3.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={saving}
+          className="shrink-0 rounded-full bg-brand-blue px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-400 disabled:shadow-none dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500"
         >
           {saving ? "Saving…" : "Save"}
         </button>
@@ -72,7 +68,7 @@ export function SuggestedResponseEditor({
         rows={6}
         disabled={saving}
         placeholder="No AI suggested response yet — write one manually."
-        className="mt-3 w-full resize-y rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-700 outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/30 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300"
+        className="mt-3 w-full resize-y rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-700 outline-none transition-colors focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/30 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300"
       />
       {error && (
         <p role="alert" className="mt-2 text-xs text-brand-red">
