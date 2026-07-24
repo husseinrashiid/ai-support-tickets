@@ -31,7 +31,7 @@ export default async function Home({
   const [total, open, resolved, urgent, tickets] = await Promise.all([
     prisma.ticket.count(),
     prisma.ticket.count({ where: { status: "Open" } }),
-    prisma.ticket.count({ where: { status: "Resolved" } }),
+    prisma.ticket.count({ where: { status: { in: ["Resolved", "Closed"] } } }),
     prisma.ticket.count({ where: { priority: "Urgent" } }),
     prisma.ticket.findMany({
       orderBy: { createdAt: "desc" },
@@ -72,7 +72,7 @@ export default async function Home({
           <StatCard label="Total" value={total} />
         </section>
 
-        <section className="overflow-hidden border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-black/30">
+        <section className="overflow-hidden border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
           <div className="hidden grid-cols-[1fr_auto_2.5rem] gap-4 border-b border-zinc-200 bg-zinc-50 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-400 sm:grid">
             <span>Ticket</span>
             <span>Status</span>
@@ -111,7 +111,7 @@ function StatCard({
   accent?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-black/30">
+    <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
       <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
         {label}
       </p>

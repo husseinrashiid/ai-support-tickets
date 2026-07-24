@@ -6,7 +6,7 @@ export async function GET() {
     const [total, open, resolved, urgent] = await Promise.all([
       prisma.ticket.count(),
       prisma.ticket.count({ where: { status: "Open" } }),
-      prisma.ticket.count({ where: { status: "Resolved" } }),
+      prisma.ticket.count({ where: { status: { in: ["Resolved", "Closed"] } } }),
       prisma.ticket.count({ where: { priority: "Urgent" } }),
     ]);
 
