@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Nav } from "@/components/Nav";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -29,9 +30,26 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function () {
+              try {
+                var stored = localStorage.getItem("theme");
+                var isDark =
+                  stored === "dark" ||
+                  (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
+                document.documentElement.classList.toggle("dark", isDark);
+              } catch (e) {}
+            })();`,
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">
-        <Nav />
-        {children}
+        <TooltipProvider>
+          <Nav />
+          {children}
+        </TooltipProvider>
       </body>
     </html>
   );
