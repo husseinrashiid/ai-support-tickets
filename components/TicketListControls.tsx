@@ -44,7 +44,7 @@ export function TicketListControls({
           id="rows-per-page"
           value={pageSize}
           onChange={handlePageSizeChange}
-          className="rounded-lg border border-zinc-300 bg-white px-2 py-1 text-sm text-zinc-900 outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/30 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+          className="rounded-lg border border-zinc-300 bg-white px-2 py-1 text-sm text-zinc-900 outline-none transition-colors focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/30 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
         >
           {TICKET_PAGE_SIZES.map((option) => (
             <option key={option} value={option}>
