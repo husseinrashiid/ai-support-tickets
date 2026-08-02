@@ -1,9 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { DEFAULT_PRIORITY_STYLE, PRIORITY_STYLES } from "@/lib/ticket-display";
+import {
+  DEFAULT_PRIORITY_STYLE,
+  NEEDS_REVIEW_BADGE_CLASSES,
+  PRIORITY_STYLES,
+} from "@/lib/ticket-display";
 import { TicketStatusControl } from "@/components/TicketStatusControl";
 import { SuggestedResponseEditor } from "@/components/SuggestedResponseEditor";
+import { RetryAnalysisButton } from "@/components/RetryAnalysisButton";
 import {
   Tooltip,
   TooltipContent,
@@ -29,7 +34,7 @@ export default async function TicketDetailsPage({
     : DEFAULT_PRIORITY_STYLE;
 
   return (
-    <div className="min-h-full flex-1 bg-zinc-100 px-4 py-10 dark:bg-black sm:px-8 sm:py-14">
+    <div className="page-glow min-h-full flex-1 px-4 py-10 sm:px-8 sm:py-14">
       <div className="mx-auto flex max-w-6xl flex-col gap-6">
         <Link
           href="/"
@@ -82,6 +87,11 @@ export default async function TicketDetailsPage({
                 <p className="mt-3 text-sm text-zinc-700 dark:text-zinc-300">
                   {ticket.aiSummary}
                 </p>
+                {!ticket.category && (
+                  <div className="mt-4">
+                    <RetryAnalysisButton ticketId={ticket.id} />
+                  </div>
+                )}
               </section>
             )}
           </div>
@@ -102,7 +112,9 @@ export default async function TicketDetailsPage({
                   Category
                 </dt>
                 <dd className="mt-1 text-sm text-zinc-700 dark:text-zinc-300">
-                  {ticket.category ?? "Uncategorized"}
+                  {ticket.category ?? (
+                    <span className={NEEDS_REVIEW_BADGE_CLASSES}>Needs review</span>
+                  )}
                 </dd>
               </div>
               <div>
@@ -110,7 +122,7 @@ export default async function TicketDetailsPage({
                   Priority
                 </dt>
                 <dd className={`mt-1 text-sm ${priorityStyle.text}`}>
-                  {ticket.priority ?? "Unclassified"}
+                  {ticket.priority ?? "—"}
                 </dd>
               </div>
               <div>
