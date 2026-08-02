@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export function SuggestedResponseEditor({
@@ -12,9 +12,17 @@ export function SuggestedResponseEditor({
 }) {
   const router = useRouter();
   const [value, setValue] = useState(initialValue);
+  const [savedValue, setSavedValue] = useState(initialValue);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedJustNow, setSavedJustNow] = useState(false);
+
+  useEffect(() => {
+    setValue(initialValue);
+    setSavedValue(initialValue);
+  }, [initialValue]);
+
+  const isDirty = value !== savedValue;
 
   async function handleSave() {
     setSaving(true);
@@ -35,6 +43,7 @@ export function SuggestedResponseEditor({
         return;
       }
 
+      setSavedValue(value);
       setSaving(false);
       setSavedJustNow(true);
       router.refresh();
@@ -45,7 +54,13 @@ export function SuggestedResponseEditor({
   }
 
   return (
-    <section className="rounded-2xl border-2 border-brand-blue/30 bg-white p-5 dark:border-brand-blue/30 dark:bg-zinc-900">
+    <section
+      className={`rounded-2xl border bg-white p-5 dark:bg-zinc-900 ${
+        isDirty
+          ? "border-2 border-brand-blue/30 dark:border-brand-blue/30"
+          : "border-zinc-200 dark:border-zinc-800"
+      }`}
+    >
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
           Suggested response
@@ -53,7 +68,7 @@ export function SuggestedResponseEditor({
         <button
           type="button"
           onClick={handleSave}
-          disabled={saving}
+          disabled={saving || !isDirty}
           className="shrink-0 rounded-full bg-brand-blue px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-400 disabled:shadow-none dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500"
         >
           {saving ? "Saving…" : "Save"}
