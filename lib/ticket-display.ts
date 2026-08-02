@@ -15,16 +15,23 @@ export function formatRelativeAge(date: Date): string {
   return `${weeks}w`;
 }
 
-export const PRIORITY_STYLES: Record<string, { border: string; text: string }> = {
-  Urgent: { border: "border-brand-red", text: "text-brand-red" },
-  High: { border: "border-orange-500", text: "text-orange-600 dark:text-orange-400" },
-  Medium: { border: "border-zinc-300 dark:border-zinc-700", text: "text-zinc-500 dark:text-zinc-400" },
-  Low: { border: "border-zinc-300 dark:border-zinc-700", text: "text-zinc-500 dark:text-zinc-400" },
+export const PRIORITY_STYLES: Record<string, { bar: string; text: string }> = {
+  Urgent: { bar: "bg-brand-red", text: "text-brand-red" },
+  High: { bar: "bg-orange-500", text: "text-orange-600 dark:text-orange-400" },
+  Medium: { bar: "bg-zinc-400 dark:bg-zinc-500", text: "text-zinc-500 dark:text-zinc-400" },
+  Low: { bar: "bg-zinc-300 dark:bg-zinc-600", text: "text-zinc-500 dark:text-zinc-400" },
 };
 
 export const DEFAULT_PRIORITY_STYLE = {
-  border: "border-zinc-200 dark:border-zinc-800",
+  bar: "bg-zinc-200 dark:bg-zinc-800",
   text: "text-zinc-400 dark:text-zinc-500",
+};
+
+export const PRIORITY_DOT_CLASSES: Record<string, string> = {
+  Low: "bg-blue-400",
+  Medium: "bg-amber-400",
+  High: "bg-orange-500",
+  Urgent: "bg-red-500",
 };
 
 export const STATUS_STYLES: Record<string, { dot: string; text: string }> = {
@@ -38,3 +45,6 @@ export const DEFAULT_STATUS_STYLE = {
   dot: "bg-zinc-400",
   text: "text-zinc-500 dark:text-zinc-400",
 };
+
+export const NEEDS_REVIEW_BADGE_CLASSES =
+  "inline-flex items-center rounded-md border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:border-amber-800/60 dark:bg-amber-950/30 dark:text-amber-400";

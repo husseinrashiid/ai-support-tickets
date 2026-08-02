@@ -22,6 +22,7 @@ export function TicketStatusControl({
   const containerRef = useRef<HTMLDivElement>(null);
 
   const statusStyle = STATUS_STYLES[status] ?? DEFAULT_STATUS_STYLE;
+  const isClosed = status === "Closed";
 
   useEffect(() => {
     if (!open) return;
@@ -84,7 +85,11 @@ export function TicketStatusControl({
         disabled={saving}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="flex items-center gap-2 rounded-full border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold text-zinc-900 transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:hover:bg-zinc-800"
+        className={`flex items-center gap-2 rounded-full border bg-white px-4 py-2 text-sm font-semibold transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-zinc-900 dark:hover:bg-zinc-800 ${
+          isClosed
+            ? "border-zinc-200 dark:border-zinc-800"
+            : "border-zinc-300 dark:border-zinc-700"
+        } ${statusStyle.text}`}
       >
         <span className={`h-1.5 w-1.5 rounded-full ${statusStyle.dot}`} />
         {status}

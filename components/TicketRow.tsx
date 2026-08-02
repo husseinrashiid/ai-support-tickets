@@ -3,6 +3,7 @@ import type { Ticket } from "@prisma/client";
 import {
   DEFAULT_PRIORITY_STYLE,
   DEFAULT_STATUS_STYLE,
+  NEEDS_REVIEW_BADGE_CLASSES,
   PRIORITY_STYLES,
   STATUS_STYLES,
   formatRelativeAge,
@@ -19,19 +20,29 @@ export function TicketRow({ ticket }: { ticket: Ticket }) {
     <li>
       <Link
         href={`/tickets/${ticket.id}`}
-        className={`flex items-center gap-4 border-l-4 px-5 py-3 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50 ${priorityStyle.border} ${
+        className={`group relative flex min-h-[72px] items-center gap-4 px-5 py-[15px] transition-colors hover:bg-brand-blue/[0.055] ${
           isClosed ? "opacity-60" : ""
         }`}
       >
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+        <span
+          aria-hidden="true"
+          className={`absolute inset-y-2.5 left-0 w-1 rounded-r-full ${priorityStyle.bar}`}
+        />
+        <div className="min-w-0 flex-1 transition-transform duration-150 ease-out group-hover:translate-x-0.5">
+          <p className="truncate text-[0.95rem] leading-snug font-semibold text-zinc-900 dark:text-zinc-50">
             {ticket.title}
           </p>
-          <p className="mt-0.5 truncate text-xs text-zinc-500 dark:text-zinc-400">
-            {ticket.category ?? "Uncategorized"}
-            {" · "}
-            <span>{ticket.priority ?? "Unclassified"}</span>
-          </p>
+          {ticket.category ? (
+            <p className="mt-[3px] truncate text-[0.78rem] text-zinc-500 dark:text-zinc-400">
+              {ticket.category}
+              {" · "}
+              <span>{ticket.priority ?? "Unclassified"}</span>
+            </p>
+          ) : (
+            <p className="mt-[5px]">
+              <span className={NEEDS_REVIEW_BADGE_CLASSES}>Needs review</span>
+            </p>
+          )}
         </div>
         <div className={`flex shrink-0 items-center gap-1.5 text-sm ${statusStyle.text}`}>
           <span className={`h-1.5 w-1.5 rounded-full ${statusStyle.dot}`} />
