@@ -1,6 +1,7 @@
-import Link from "next/link";
 import { Prisma } from "@prisma/client";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
 import { TicketRow } from "@/components/TicketRow";
 import { TicketListControls } from "@/components/TicketListControls";
 import { TicketFilterBar } from "@/components/TicketFilterBar";
@@ -20,6 +21,10 @@ export default async function Home({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+  if (user.role !== "agent") redirect("/my-tickets");
+
   const params = await searchParams;
 
   const requestedPageSize = Number(params.pageSize);
@@ -73,28 +78,20 @@ export default async function Home({
 
   return (
     <div className="dashboard-glow flex min-h-full flex-1 flex-col">
-      <div className="mx-auto flex w-[min(1120px,calc(100%-48px))] flex-1 flex-col pt-9 pb-14 sm:pt-11 sm:pb-16">
-        <header className="mb-7 flex items-start justify-between gap-4 border-b border-zinc-200 pb-6 dark:border-zinc-800">
-          <div>
-            <h1 className="text-5xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
-              Tickets
-              <span className="ml-1 text-brand-blue">.</span>
-            </h1>
-            <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-              {urgent > 0
-                ? `${urgent} need${urgent === 1 ? "s" : ""} attention today`
-                : "No urgent tickets"}
-            </p>
-          </div>
-          <Link
-            href="/tickets/new"
-            className="shrink-0 rounded-full bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-blue-dark"
-          >
-            + New ticket
-          </Link>
+      <div className="mx-auto flex w-[min(1120px,calc(100%-48px))] flex-1 flex-col pt-[42px] pb-14 sm:pb-16">
+        <header className="mb-7 border-b border-zinc-200 pb-6 dark:border-zinc-800">
+          <h1 className="text-5xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
+            Tickets
+            <span className="ml-1 text-brand-blue">.</span>
+          </h1>
+          <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+            {urgent > 0
+              ? `${urgent} need${urgent === 1 ? "s" : ""} attention today`
+              : "No urgent tickets"}
+          </p>
         </header>
 
-        <section className="mb-[30px] grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <section className="mb-7 grid grid-cols-2 gap-4 sm:grid-cols-4">
           <StatCard label="Urgent" value={urgent} accent="text-brand-red" />
           <StatCard label="Open" value={open} />
           <StatCard label="Resolved" value={resolved} />
@@ -105,7 +102,7 @@ export default async function Home({
           <TicketFilterBar status={status} category={category} priority={priority} sort={sort} />
         </div>
 
-        <section className="mb-[22px] overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
+        <section className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
           <div className="hidden grid-cols-[1fr_auto_2.5rem] gap-4 border-b border-zinc-200 bg-zinc-50 px-5 py-3.5 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-400 sm:grid">
             <span>Ticket</span>
             <span>Status</span>
@@ -122,17 +119,12 @@ export default async function Home({
               tickets.map((ticket) => <TicketRow key={ticket.id} ticket={ticket} />)
             )}
           </ul>
+          {matchingTotal > 0 && (
+            <footer className="border-t border-zinc-200 bg-zinc-50/60 px-5 py-4 dark:border-zinc-800 dark:bg-zinc-900/60">
+              <TicketListControls page={page} pageSize={pageSize} totalPages={totalPages} />
+            </footer>
+          )}
         </section>
-
-        {matchingTotal > 0 && (
-          <div className="mt-4">
-            <TicketListControls
-              page={page}
-              pageSize={pageSize}
-              totalPages={totalPages}
-            />
-          </div>
-        )}
       </div>
     </div>
   );
@@ -148,7 +140,7 @@ function StatCard({
   accent?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
+    <div className="min-h-24 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
       <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
         {label}
       </p>

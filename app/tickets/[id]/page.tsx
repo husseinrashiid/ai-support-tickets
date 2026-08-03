@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
 import {
   DEFAULT_PRIORITY_STYLE,
   NEEDS_REVIEW_BADGE_CLASSES,
@@ -22,6 +23,10 @@ export default async function TicketDetailsPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+  if (user.role !== "agent") redirect("/my-tickets");
+
   const { id } = await params;
   const ticket = await prisma.ticket.findUnique({ where: { id } });
 
