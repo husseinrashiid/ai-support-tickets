@@ -3,12 +3,17 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+const MESSAGE_CHAR_LIMIT = 500;
+
 export function TicketForm() {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const messageCharCount = message.length;
+  const atCharLimit = messageCharCount >= MESSAGE_CHAR_LIMIT;
 
   async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -41,7 +46,7 @@ export function TicketForm() {
         return;
       }
 
-      router.push(`/tickets/${data.ticket.id}`);
+      router.push(`/my-tickets/${data.ticket.id}`);
     } catch {
       setError("Could not reach the server. Please check your connection and try again.");
       setSubmitting(false);
@@ -74,12 +79,17 @@ export function TicketForm() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <label
-          htmlFor="message"
-          className="text-sm font-medium text-zinc-900 dark:text-zinc-50"
-        >
-          Message <span className="text-brand-red">*</span>
-        </label>
+        <div className="flex items-center justify-between gap-4">
+          <label
+            htmlFor="message"
+            className="text-sm font-medium text-zinc-900 dark:text-zinc-50"
+          >
+            Message <span className="text-brand-red">*</span>
+          </label>
+          <span className="text-xs text-zinc-500 dark:text-zinc-400">
+            {messageCharCount} / {MESSAGE_CHAR_LIMIT} characters
+          </span>
+        </div>
         <textarea
           id="message"
           name="message"
@@ -88,13 +98,18 @@ export function TicketForm() {
           value={message}
           onChange={(event) => setMessage(event.target.value)}
           disabled={submitting}
+          maxLength={MESSAGE_CHAR_LIMIT}
           placeholder="Describe the customer's issue in detail"
           className="resize-y rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition-colors focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/30 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
         />
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          The full customer message. This is what the AI analysis reads to
-          categorize, prioritize, and draft a suggested reply.
-        </p>
+        {atCharLimit ? (
+          <p className="text-xs font-medium text-brand-red">Character limit reached.</p>
+        ) : (
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            The full customer message. This is what the AI analysis reads to
+            categorize, prioritize, and draft a suggested reply.
+          </p>
+        )}
       </div>
 
       {error && (

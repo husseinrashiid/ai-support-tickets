@@ -9,7 +9,7 @@ import {
   formatRelativeAge,
 } from "@/lib/ticket-display";
 
-export function TicketRow({ ticket }: { ticket: Ticket }) {
+export function TicketRow({ ticket, href }: { ticket: Ticket; href?: string }) {
   const priorityStyle = ticket.priority
     ? PRIORITY_STYLES[ticket.priority] ?? DEFAULT_PRIORITY_STYLE
     : DEFAULT_PRIORITY_STYLE;
@@ -19,9 +19,9 @@ export function TicketRow({ ticket }: { ticket: Ticket }) {
   return (
     <li>
       <Link
-        href={`/tickets/${ticket.id}`}
+        href={href ?? `/tickets/${ticket.id}`}
         className={`group relative flex min-h-[72px] items-center gap-4 px-5 py-[15px] transition-colors hover:bg-brand-blue/[0.055] ${
-          isClosed ? "opacity-60" : ""
+          isClosed ? "opacity-[0.62]" : ""
         }`}
       >
         <span
