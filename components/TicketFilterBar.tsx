@@ -56,7 +56,7 @@ export function TicketFilterBar({
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div className="flex flex-wrap items-center gap-2.5">
-        <div className="flex items-stretch divide-x divide-zinc-200 rounded-lg border border-zinc-300 bg-white dark:divide-zinc-800 dark:border-zinc-700 dark:bg-zinc-900">
+        <div className="flex h-10 items-stretch divide-x divide-zinc-200 rounded-lg border border-zinc-300 bg-white dark:divide-zinc-800 dark:border-zinc-700 dark:bg-zinc-900">
           <FilterDropdown
             ariaLabel="Filter by status"
             placeholder="Any status"
@@ -105,8 +105,7 @@ export function TicketFilterBar({
         )}
       </div>
 
-      <div className="flex items-center gap-3">
-        <div className="hidden h-6 w-px bg-zinc-200 dark:bg-zinc-800 sm:block" aria-hidden="true" />
+      <div className="flex items-center">
         <SortDropdown sort={sort} onChange={updateSort} />
       </div>
     </div>

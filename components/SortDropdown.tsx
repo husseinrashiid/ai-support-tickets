@@ -51,7 +51,7 @@ export function SortDropdown({
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Sort by date"
-        className="flex h-11 items-center gap-2 whitespace-nowrap rounded-[11px] border border-zinc-300 bg-white px-3.5 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:bg-zinc-800"
+        className="flex h-10 items-center gap-2 whitespace-nowrap rounded-[11px] border border-zinc-300 bg-white px-3.5 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:bg-zinc-800"
       >
         <span className="text-zinc-500 dark:text-zinc-400">Sort:</span>
         {current.label}

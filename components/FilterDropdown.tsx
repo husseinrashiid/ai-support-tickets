@@ -67,7 +67,7 @@ export function FilterDropdown({
 
   const triggerClasses =
     variant === "grouped"
-      ? `flex items-center gap-2 px-3 py-1.5 text-sm transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/60 ${edgeRounding} ${
+      ? `flex h-full items-center gap-2 px-3 text-sm transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/60 ${edgeRounding} ${
           isActive
             ? "font-medium text-zinc-900 dark:text-zinc-50"
             : "text-zinc-500 dark:text-zinc-400"
