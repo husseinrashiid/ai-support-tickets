@@ -1,8 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { analyzeTicket } from "@/lib/ai";
+import { getCurrentUser } from "@/lib/auth";
 
 export async function GET() {
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+  }
+  if (user.role !== "agent") {
+    return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+  }
+
   try {
     const tickets = await prisma.ticket.findMany({
       orderBy: { createdAt: "desc" },
@@ -18,6 +27,14 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+  }
+  if (user.role !== "customer") {
+    return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+  }
+
   let body: unknown;
   try {
     body = await request.json();
@@ -54,6 +71,7 @@ export async function POST(request: NextRequest) {
         title: title.trim(),
         message: message.trim(),
         status: "Open",
+        ownerId: user.id,
       },
     });
   } catch (error) {
