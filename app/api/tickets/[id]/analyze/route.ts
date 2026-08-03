@@ -1,12 +1,21 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { analyzeTicket } from "@/lib/ai";
+import { getCurrentUser } from "@/lib/auth";
 
 export async function POST(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+  }
+  if (user.role !== "agent") {
+    return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+  }
 
   let ticket;
   try {
