@@ -121,6 +121,30 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+.dashboard-glow {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(28, 108, 168, 0.08), transparent 36%),
+    #f4f5f7;
+}
+
+.dark .dashboard-glow {
+  background:
+    radial-gradient(circle at 50% 5%, rgba(28, 108, 168, 0.1), transparent 34%),
+    #08090b;
+}
+
+.page-glow {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(28, 108, 168, 0.035), transparent 40%),
+    #f4f5f7;
+}
+
+.dark .page-glow {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(28, 108, 168, 0.045), transparent 38%),
+    #08090b;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
