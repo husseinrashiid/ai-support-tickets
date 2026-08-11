@@ -70,7 +70,7 @@ export function AttachmentPicker({
           Attach image
         </button>
       ) : (
-        <div className="flex items-center gap-2 rounded-xl border border-zinc-300 px-2.5 py-1.5 dark:border-zinc-700">
+        <div className="flex min-w-0 max-w-[260px] items-center gap-2 rounded-xl border border-zinc-300 px-2.5 py-1.5 dark:border-zinc-700">
           {previewUrl && (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={previewUrl} alt="" className="h-8 w-8 shrink-0 rounded-md object-cover" />

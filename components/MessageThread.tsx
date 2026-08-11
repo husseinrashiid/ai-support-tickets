@@ -109,19 +109,19 @@ export const MessageThread = forwardRef<
   const hasEntries = leadingEntries.length > 0 || messages.length > 0;
 
   return (
-    <section className="rounded-[14px] border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+    <section className="rounded-[14px] border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
       <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-300">
         Conversation
       </h2>
 
-      <div className="relative mt-4 flex flex-col">
+      <div className="relative mt-[22px] flex flex-col">
         {!hasEntries ? (
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
             No messages yet.
           </p>
         ) : (
           <>
-            <div className="absolute bottom-2 left-[5px] top-2 w-px bg-zinc-300 dark:bg-[#343840]" />
+            <div className="absolute bottom-2 left-[5px] top-2 w-px bg-zinc-300 dark:bg-zinc-600" />
 
             {leadingEntries.map((entry) => (
               <MessageRow
@@ -187,21 +187,21 @@ export const MessageThread = forwardRef<
               {error}
             </p>
           )}
-          <div className="mt-3">
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
             <AttachmentPicker file={attachment} onChange={setAttachment} disabled={sending} />
-          </div>
-          <div className="mt-3 flex items-center justify-between gap-3">
-            <span className="text-xs text-zinc-500 dark:text-zinc-400">
-              {charCount} / {CONTENT_LIMIT} characters
-            </span>
-            <button
-              type="button"
-              onClick={handleSend}
-              disabled={sending || !content.trim()}
-              className="shrink-0 rounded-full bg-brand-blue px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-400 disabled:shadow-none dark:disabled:bg-[#27313a] dark:disabled:text-[#7f8a96]"
-            >
-              {sending ? "Sending…" : "Send reply"}
-            </button>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                {charCount} / {CONTENT_LIMIT} characters
+              </span>
+              <button
+                type="button"
+                onClick={handleSend}
+                disabled={sending || !content.trim()}
+                className="shrink-0 rounded-full bg-brand-blue px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-400 disabled:shadow-none dark:disabled:bg-[#27313a] dark:disabled:text-[#7f8a96]"
+              >
+                {sending ? "Sending…" : "Send reply"}
+              </button>
+            </div>
           </div>
         </div>
       ) : (
@@ -246,7 +246,7 @@ function MessageRow({
           </span>
         )}
       </div>
-      <p className="mt-1 max-w-[720px] whitespace-pre-wrap text-sm leading-[1.6] text-zinc-700 dark:text-zinc-300">
+      <p className="mt-1 max-w-[800px] whitespace-pre-wrap text-sm leading-[1.55] text-zinc-700 dark:text-zinc-300">
         {content}
       </p>
       {attachment && <AttachmentThumbnail attachment={attachment} />}

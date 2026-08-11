@@ -14,7 +14,7 @@ export function AttachmentThumbnail({
       <img
         src={`/api/attachments/${attachment.id}`}
         alt={attachment.filename}
-        className="h-28 w-28 object-cover"
+        className="h-32 w-32 object-cover"
       />
     </a>
   );
