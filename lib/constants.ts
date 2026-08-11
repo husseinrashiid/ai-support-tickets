@@ -23,3 +23,15 @@ export const DEFAULT_TICKET_PAGE_SIZE: TicketPageSize = 5;
 
 export const USER_ROLES = ["customer", "agent"] as const;
 export type UserRole = (typeof USER_ROLES)[number];
+
+export const MESSAGE_WRITABLE_STATUSES: TicketStatus[] = ["Open", "In Progress"];
+
+export const ALLOWED_ATTACHMENT_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+] as const;
+export type AllowedAttachmentMimeType = (typeof ALLOWED_ATTACHMENT_MIME_TYPES)[number];
+
+export const MAX_ATTACHMENT_SIZE_BYTES = 8 * 1024 * 1024; // 8MB

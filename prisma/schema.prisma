@@ -16,8 +16,11 @@ model Ticket {
   status                 String   @default("Open")
   aiSummary              String?
   aiSuggestedResponse    String?
+  responseReviewed       Boolean  @default(false)
   ownerId                String?
   owner                  User?    @relation(fields: [ownerId], references: [id])
+  messages               Message[]
+  attachments            Attachment[]
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 
@@ -31,4 +34,36 @@ model User {
   role         String
   createdAt    DateTime @default(now())
   tickets      Ticket[]
+  messages     Message[]
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  ticketId    String
+  ticket      Ticket   @relation(fields: [ticketId], references: [id])
+  senderId    String
+  sender      User     @relation(fields: [senderId], references: [id])
+  senderRole  String
+  content     String
+  attachments Attachment[]
+  createdAt   DateTime @default(now())
+
+  @@index([ticketId])
+}
+
+// Belongs to exactly one of Ticket (attached at creation) or Message (attached to a reply).
+model Attachment {
+  id        String   @id @default(cuid())
+  ticketId  String?
+  ticket    Ticket?  @relation(fields: [ticketId], references: [id])
+  messageId String?
+  message   Message? @relation(fields: [messageId], references: [id])
+  filename  String
+  mimeType  String
+  size      Int
+  data      Bytes
+  createdAt DateTime @default(now())
+
+  @@index([ticketId])
+  @@index([messageId])
 }

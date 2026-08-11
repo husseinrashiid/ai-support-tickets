@@ -1,3 +1,28 @@
+export function formatDateTime(input: Date | string): string {
+  const date = input instanceof Date ? input : new Date(input);
+  const datePart = date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  const timePart = date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+  return `${datePart} at ${timePart}`;
+}
+
+export function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+export function formatTicketReference(id: string): string {
+  return `ST-${id.slice(-6).toUpperCase()}`;
+}
+
 export function formatRelativeAge(date: Date): string {
   const diffMs = Date.now() - date.getTime();
   const minutes = Math.floor(diffMs / 60000);
