@@ -43,10 +43,7 @@ export function LoginForm() {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-col gap-5 rounded-2xl border border-zinc-200 bg-white p-8 dark:border-zinc-800 dark:bg-zinc-900"
-    >
+    <form onSubmit={handleSubmit} className="mt-[30px] flex flex-col gap-5">
       <div className="flex flex-col gap-2">
         <label
           htmlFor="email"
@@ -63,7 +60,7 @@ export function LoginForm() {
           onChange={(event) => setEmail(event.target.value)}
           disabled={submitting}
           placeholder="you@example.com"
-          className="h-12 rounded-xl border border-zinc-300 bg-white px-3 text-sm text-zinc-900 outline-none transition-colors focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/30 disabled:opacity-60 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-50"
+          className="h-[46px] rounded-lg border border-zinc-300 bg-white px-3 text-sm text-zinc-900 outline-none transition-colors focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/30 disabled:opacity-60 dark:border-zinc-500 dark:bg-zinc-900 dark:text-zinc-50"
         />
       </div>
 
@@ -89,7 +86,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={submitting}
-        className="inline-flex h-[46px] w-full items-center justify-center gap-2 rounded-full bg-brand-blue px-5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex h-[46px] w-full items-center justify-center gap-2 rounded-lg bg-brand-blue text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-60"
       >
         {submitting && (
           <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
@@ -97,9 +94,9 @@ export function LoginForm() {
         {submitting ? "Logging in…" : "Log in"}
       </button>
 
-      <p className="-mt-0.5 text-center text-sm text-zinc-500 dark:text-zinc-400">
+      <p className="-mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
         Don&apos;t have an account?{" "}
-        <Link href="/register" className="font-medium text-brand-blue hover:underline">
+        <Link href="/register" className="font-medium text-[#4a7fa3] hover:text-[#3a6a8c] hover:underline">
           Register
         </Link>
       </p>
