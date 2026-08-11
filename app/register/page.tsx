@@ -9,14 +9,14 @@ export default async function RegisterPage() {
   }
 
   return (
-    <div className="page-glow flex min-h-full flex-1 items-center justify-center px-4 pt-10 pb-20 sm:px-8">
-      <div className="flex w-full max-w-[420px] flex-col">
-        <header className="mb-7">
-          <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
+    <div className="page-glow flex min-h-full flex-1 items-start justify-center px-4 pt-[90px] pb-14 sm:px-8">
+      <div className="w-full max-w-[440px]">
+        <header>
+          <h1 className="text-[32px] font-bold tracking-[-0.02em] text-zinc-900 dark:text-zinc-50">
             Create an account
           </h1>
-          <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-            Register as a customer to submit tickets or as a support agent to manage them.
+          <p className="mt-2 text-[15px] text-zinc-600 dark:text-[#9aa0aa]">
+            Sign up to submit and track your support tickets.
           </p>
         </header>
 

@@ -3,38 +3,54 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { USER_ROLES, type UserRole } from "@/lib/constants";
-import { PASSWORD_REQUIREMENTS_TEXT, isPasswordStrong } from "@/lib/password";
+import { isPasswordStrong } from "@/lib/password";
 import { PasswordInput } from "@/components/PasswordInput";
 
-const ROLE_LABELS: Record<UserRole, string> = {
-  customer: "Customer",
-  agent: "Support Agent",
-};
+const PASSWORD_HINT_TEXT = "8+ characters, including a number and special character";
 
 const inputClasses =
-  "h-12 rounded-xl border border-zinc-300 bg-white px-3 text-sm text-zinc-900 outline-none transition-colors focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/30 disabled:opacity-60 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-50";
+  "h-[46px] rounded-lg border border-zinc-300 bg-white px-3 text-sm text-zinc-900 outline-none transition-colors focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/30 disabled:opacity-60 dark:border-zinc-500 dark:bg-zinc-900 dark:text-zinc-50";
 
 export function RegisterForm() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<UserRole>("customer");
+  const [passwordTouched, setPasswordTouched] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmPasswordTouched, setConfirmPasswordTouched] = useState(false);
+  const [confirmPasswordFocused, setConfirmPasswordFocused] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const passwordChecks = [
-    { label: "At least 8 characters", met: password.length >= 8 },
-    { label: "A number", met: /[0-9]/.test(password) },
-    { label: "A special character", met: /[^A-Za-z0-9]/.test(password) },
-  ];
+  const passwordInvalid = passwordTouched && !isPasswordStrong(password);
+  const passwordBorderInvalid = passwordInvalid && !passwordFocused;
+
+  const confirmPasswordEmpty = confirmPassword.length === 0;
+  const confirmPasswordMismatch = !confirmPasswordEmpty && confirmPassword !== password;
+  const confirmPasswordInvalid = confirmPasswordTouched && (confirmPasswordEmpty || confirmPasswordMismatch);
+  const confirmPasswordBorderInvalid = confirmPasswordInvalid && !confirmPasswordFocused;
+  const confirmPasswordErrorText = confirmPasswordEmpty
+    ? "Please confirm your password."
+    : "Passwords do not match.";
 
   async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
 
-    if (!isPasswordStrong(password)) {
-      setError(PASSWORD_REQUIREMENTS_TEXT);
+    const passwordOk = isPasswordStrong(password);
+    const confirmOk = confirmPassword.length > 0 && confirmPassword === password;
+
+    if (!passwordOk) {
+      setPasswordTouched(true);
+      setPasswordFocused(false);
+    }
+    if (!confirmOk) {
+      setConfirmPasswordTouched(true);
+      setConfirmPasswordFocused(false);
+    }
+    if (!passwordOk || !confirmOk) {
       return;
     }
 
@@ -44,7 +60,7 @@ export function RegisterForm() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, role }),
+        body: JSON.stringify({ email, password }),
       });
       const data = (await res.json()) as {
         user?: { role: string };
@@ -57,7 +73,7 @@ export function RegisterForm() {
         return;
       }
 
-      router.push(data.user.role === "agent" ? "/" : "/my-tickets");
+      router.push("/my-tickets");
       router.refresh();
     } catch {
       setError("Could not reach the server. Please try again.");
@@ -66,10 +82,7 @@ export function RegisterForm() {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-col gap-5 rounded-2xl border border-zinc-200 bg-white p-8 dark:border-zinc-800 dark:bg-zinc-900"
-    >
+    <form onSubmit={handleSubmit} noValidate className="mt-[30px] flex flex-col gap-5">
       <div className="flex flex-col gap-2">
         <label
           htmlFor="email"
@@ -90,55 +103,65 @@ export function RegisterForm() {
         />
       </div>
 
-      <div className="flex flex-col gap-2">
-        <label
-          htmlFor="password"
-          className="text-sm font-medium text-zinc-900 dark:text-zinc-50"
-        >
-          Password <span className="text-brand-red">*</span>
-        </label>
-        <PasswordInput value={password} onChange={setPassword} disabled={submitting} />
-        <ul className="flex flex-col gap-1">
-          {passwordChecks.map((check) => (
-            <li
-              key={check.label}
-              className={`flex items-center gap-1.5 text-xs transition-colors ${
-                check.met
-                  ? "text-[#35b66f]"
-                  : "text-[#8f96a3]"
-              }`}
+      <div className="flex flex-col gap-4">
+        <div>
+          <div className="flex flex-col gap-2">
+            <label
+              htmlFor="password"
+              className="text-sm font-medium text-zinc-900 dark:text-zinc-50"
             >
-              {check.met ? <CheckIcon /> : <DotIcon />}
-              {check.label}
-            </li>
-          ))}
-        </ul>
-      </div>
+              Password <span className="text-brand-red">*</span>
+            </label>
+            <PasswordInput
+              id="password"
+              value={password}
+              onChange={setPassword}
+              disabled={submitting}
+              placeholder="Enter your password"
+              invalid={passwordBorderInvalid}
+              showPassword={showPassword}
+              onToggleShowPassword={() => setShowPassword((visible) => !visible)}
+              onFocus={() => setPasswordFocused(true)}
+              onBlur={() => {
+                setPasswordFocused(false);
+                setPasswordTouched(true);
+              }}
+            />
+          </div>
+          <p
+            className={`mt-[7px] text-[13px] ${
+              passwordInvalid ? "text-[#f87171]" : "text-zinc-500 dark:text-zinc-400"
+            }`}
+          >
+            {PASSWORD_HINT_TEXT}
+          </p>
+        </div>
 
-      <div className="flex flex-col gap-2">
-        <span className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
-          I am a <span className="text-brand-red">*</span>
-        </span>
-        <div className="grid grid-cols-2 gap-3">
-          {USER_ROLES.map((option) => {
-            const selected = role === option;
-            return (
-              <button
-                key={option}
-                type="button"
-                onClick={() => setRole(option)}
-                disabled={submitting}
-                aria-pressed={selected}
-                className={`flex h-12 items-center justify-center rounded-xl border px-3 text-sm font-medium transition-colors ${
-                  selected
-                    ? "border-brand-blue bg-brand-blue/15 text-brand-blue dark:bg-brand-blue/20 dark:text-sky-400"
-                    : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:border-zinc-500 dark:hover:bg-zinc-900"
-                }`}
-              >
-                {ROLE_LABELS[option]}
-              </button>
-            );
-          })}
+        <div className="flex flex-col gap-2">
+          <label
+            htmlFor="confirmPassword"
+            className="text-sm font-medium text-zinc-900 dark:text-zinc-50"
+          >
+            Confirm password <span className="text-brand-red">*</span>
+          </label>
+          <PasswordInput
+            id="confirmPassword"
+            value={confirmPassword}
+            onChange={setConfirmPassword}
+            disabled={submitting}
+            placeholder="Re-enter your password"
+            invalid={confirmPasswordBorderInvalid}
+            showPassword={showPassword}
+            onToggleShowPassword={() => setShowPassword((visible) => !visible)}
+            onFocus={() => setConfirmPasswordFocused(true)}
+            onBlur={() => {
+              setConfirmPasswordFocused(false);
+              setConfirmPasswordTouched(true);
+            }}
+          />
+          {confirmPasswordInvalid && (
+            <p className="text-[13px] text-[#f87171]">{confirmPasswordErrorText}</p>
+          )}
         </div>
       </div>
 
@@ -154,7 +177,7 @@ export function RegisterForm() {
       <button
         type="submit"
         disabled={submitting}
-        className="mt-2 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-brand-blue text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex h-[46px] w-full items-center justify-center gap-2 rounded-lg bg-brand-blue text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-60"
       >
         {submitting && (
           <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
@@ -162,36 +185,12 @@ export function RegisterForm() {
         {submitting ? "Creating account…" : "Create account"}
       </button>
 
-      <p className="-mt-0.5 text-center text-sm text-zinc-500 dark:text-zinc-400">
+      <p className="-mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
         Already have an account?{" "}
-        <Link href="/login" className="font-medium text-brand-blue hover:underline">
+        <Link href="/login" className="font-medium text-[#4a7fa3] hover:text-[#3a6a8c] hover:underline">
           Log in
         </Link>
       </p>
     </form>
-  );
-}
-
-function CheckIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="h-3 w-3 shrink-0"
-    >
-      <path d="M20 6L9 17l-5-5" />
-    </svg>
-  );
-}
-
-function DotIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-3 w-3 shrink-0">
-      <circle cx="12" cy="12" r="4" fill="currentColor" />
-    </svg>
   );
 }

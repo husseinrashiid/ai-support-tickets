@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { USER_ROLES } from "@/lib/constants";
 import { createSessionToken, hashPassword, setSessionCookie } from "@/lib/auth";
 import { PASSWORD_REQUIREMENTS_TEXT, isPasswordStrong } from "@/lib/password";
 
+// Public registration always creates a customer account. Agent accounts are
+// provisioned out-of-band (see prisma/seed.ts) so a visitor can never grant
+// themselves access to other customers' tickets by posting role: "agent".
 export async function POST(request: NextRequest) {
   let body: unknown;
   try {
@@ -16,10 +18,9 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { email, password, role } = (body ?? {}) as {
+  const { email, password } = (body ?? {}) as {
     email?: unknown;
     password?: unknown;
-    role?: unknown;
   };
 
   if (typeof email !== "string" || email.trim().length === 0) {
@@ -31,15 +32,6 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
-  if (
-    typeof role !== "string" ||
-    !(USER_ROLES as readonly string[]).includes(role)
-  ) {
-    return NextResponse.json(
-      { error: `Role must be one of: ${USER_ROLES.join(", ")}.` },
-      { status: 400 }
-    );
-  }
 
   const normalizedEmail = email.trim().toLowerCase();
 
@@ -47,7 +39,7 @@ export async function POST(request: NextRequest) {
   try {
     const passwordHash = await hashPassword(password);
     user = await prisma.user.create({
-      data: { email: normalizedEmail, passwordHash, role },
+      data: { email: normalizedEmail, passwordHash, role: "customer" },
     });
   } catch (error) {
     if (
