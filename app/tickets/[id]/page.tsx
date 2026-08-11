@@ -105,11 +105,11 @@ export default async function TicketDetailsPage({
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_335px]">
           <div className="flex flex-col gap-6">
             {ticket.aiSummary && (
-              <section className="rounded-[14px] border border-zinc-200 border-l-2 border-l-brand-blue bg-white px-[18px] py-4 dark:border-zinc-800 dark:border-l-brand-blue dark:bg-zinc-900">
+              <section className="rounded-[14px] border border-zinc-200 border-l-2 border-l-brand-blue bg-zinc-50 px-5 py-3.5 dark:border-zinc-800 dark:border-l-brand-blue dark:bg-black/20">
                 <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-300">
                   AI summary
                 </h2>
-                <p className="mt-3 text-sm text-zinc-700 dark:text-zinc-300">
+                <p className="mt-2 text-sm text-zinc-700 dark:text-zinc-300">
                   {ticket.aiSummary}
                 </p>
                 {!ticket.category && (
@@ -130,11 +130,11 @@ export default async function TicketDetailsPage({
             />
           </div>
 
-          <aside className="rounded-[14px] border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900 lg:h-fit">
-            <h2 className="mb-4 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-300">
+          <aside className="rounded-[14px] border border-zinc-200 bg-white px-5 py-4 dark:border-zinc-800 dark:bg-zinc-900 lg:h-fit">
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-300">
               Ticket details
             </h2>
-            <dl className="grid gap-[14px]">
+            <dl className="grid gap-3">
               <div className="grid gap-[5px]">
                 <dt className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-300">
                   Status
