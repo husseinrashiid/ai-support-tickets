@@ -32,15 +32,24 @@ export async function PATCH(
 
   if (typeof aiSuggestedResponse !== "string") {
     return NextResponse.json(
-      { error: "ai Suggested Response must be a string." },
+      { error: "aiSuggestedResponse must be a string." },
       { status: 400 }
     );
   }
+
   try {
+    const existing = await prisma.ticket.findUnique({ where: { id } });
+    if (!existing) {
+      return NextResponse.json({ error: "Ticket not found." }, { status: 404 });
+    }
+
+    // Internal draft edits are not customer-visible, so they must not
+    // bump "last updated" — explicitly pin @updatedAt back to its prior value.
     const ticket = await prisma.ticket.update({
       where: { id },
-      data: { aiSuggestedResponse },
+      data: { aiSuggestedResponse, updatedAt: existing.updatedAt },
     });
+
     return NextResponse.json({ ticket });
   } catch (error) {
     if (
@@ -54,7 +63,7 @@ export async function PATCH(
     }
     console.error(`PATCH /api/tickets/${id}/response failed:`, error);
     return NextResponse.json(
-      { error: "Failed to update suggested response." },
+      { error: "Failed to save the response." },
       { status: 500 }
     );
   }

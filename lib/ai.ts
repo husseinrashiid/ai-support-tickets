@@ -20,6 +20,15 @@ export type AiAnalysisResult =
   | { ok: true; data: AiAnalysis }
   | { ok: false; error: string };
 
+export type ConversationTurn = {
+  role: "customer" | "agent";
+  content: string;
+};
+
+export type AiReplyResult =
+  | { ok: true; data: { suggestedResponse: string } }
+  | { ok: false; error: string };
+
 const RESPONSE_SCHEMA = {
   type: "object",
   properties: {
@@ -38,10 +47,26 @@ const RESPONSE_SCHEMA = {
   additionalProperties: false,
 } as const;
 
-function buildSystemPrompt(): string {
-  const articles = (supportArticles as { title: string; category: string; content: string }[])
+const REPLY_SCHEMA = {
+  type: "object",
+  properties: {
+    suggestedResponse: {
+      type: "string",
+      description: "A short, professional reply the support agent can review and send, addressing the customer's most recent message.",
+    },
+  },
+  required: ["suggestedResponse"],
+  additionalProperties: false,
+} as const;
+
+function formatArticles(): string {
+  return (supportArticles as { title: string; category: string; content: string }[])
     .map((article) => `Title: ${article.title}\nCategory: ${article.category}\nContent: ${article.content}`)
     .join("\n\n");
+}
+
+function buildSystemPrompt(): string {
+  const articles = formatArticles();
 
   return `You are an assistant helping a customer support team triage incoming support tickets.
 
@@ -145,4 +170,87 @@ function validateAnalysis(value: unknown): AiAnalysisResult {
       suggestedResponse,
     },
   };
+}
+
+function buildReplySystemPrompt(): string {
+  const articles = formatArticles();
+
+  return `You are an assistant helping a customer support agent reply to an ongoing support ticket conversation.
+
+You will be given the original ticket and the full conversation so far, ending with the customer's most recent message. Write a short, professional reply the agent can review, edit, and send that directly addresses that most recent message - do not repeat earlier replies. When one of the reference articles below is relevant, use it to ground the reply, but write a natural reply, don't quote the article verbatim.
+
+Reference support articles:
+
+${articles}
+
+Respond with only a JSON object matching this exact shape - no prose, no markdown code fences, no explanation before or after:
+{"suggestedResponse": "..."}`;
+}
+
+export async function generateReply(
+  title: string,
+  message: string,
+  conversation: ConversationTurn[]
+): Promise<AiReplyResult> {
+  const transcript = [
+    `Customer: ${message}`,
+    ...conversation.map((turn) => `${turn.role === "agent" ? "Support agent" : "Customer"}: ${turn.content}`),
+  ].join("\n\n");
+
+  let response;
+  try {
+    response = await client.messages.create(
+      {
+        model: "claude-haiku-4-5",
+        max_tokens: 1024,
+        system: buildReplySystemPrompt(),
+        messages: [
+          {
+            role: "user",
+            content: `Ticket title: ${title}\n\nConversation so far:\n\n${transcript}`,
+          },
+        ],
+        output_config: {
+          format: { type: "json_schema", schema: REPLY_SCHEMA },
+        },
+      },
+      { timeout: 30_000 }
+    );
+  } catch (error) {
+    console.error("AI reply request failed:", error);
+    return { ok: false, error: "The AI request failed or the AI service is unavailable." };
+  }
+
+  if (response.stop_reason === "refusal") {
+    return { ok: false, error: "The AI declined to draft a reply." };
+  }
+
+  const textBlock = response.content.find((block) => block.type === "text");
+  if (!textBlock || textBlock.type !== "text") {
+    return { ok: false, error: "The AI response did not contain any text." };
+  }
+
+  let parsed: unknown;
+  try {
+    const raw = textBlock.text
+      .trim()
+      .replace(/^```(?:json)?/, "")
+      .replace(/```$/, "")
+      .trim();
+    parsed = JSON.parse(raw);
+  } catch (error) {
+    console.error("Failed to parse AI reply response as JSON:", error, textBlock.text);
+    return { ok: false, error: "The AI response could not be parsed." };
+  }
+
+  if (typeof parsed !== "object" || parsed === null) {
+    return { ok: false, error: "The AI response was not a JSON object." };
+  }
+
+  const { suggestedResponse } = parsed as Record<string, unknown>;
+  if (typeof suggestedResponse !== "string" || suggestedResponse.trim().length === 0) {
+    return { ok: false, error: "The AI response is missing a valid suggested response." };
+  }
+
+  return { ok: true, data: { suggestedResponse } };
 }
