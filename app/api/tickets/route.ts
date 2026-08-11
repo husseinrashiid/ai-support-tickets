@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { analyzeTicket } from "@/lib/ai";
 import { getCurrentUser } from "@/lib/auth";
+import { validateAttachmentFile, type AttachmentInput } from "@/lib/attachments";
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -35,20 +36,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   }
 
-  let body: unknown;
+  let formData: FormData;
   try {
-    body = await request.json();
+    formData = await request.formData();
   } catch {
     return NextResponse.json(
-      { error: "Request body must be valid JSON." },
+      { error: "Request body must be valid form data." },
       { status: 400 }
     );
   }
 
-  const { title, message } = (body ?? {}) as {
-    title?: unknown;
-    message?: unknown;
-  };
+  const title = formData.get("title");
+  const message = formData.get("message");
+  const attachmentFile = formData.get("attachment");
 
   if (typeof title !== "string" || title.trim().length === 0) {
     return NextResponse.json(
@@ -64,6 +64,15 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  let attachment: AttachmentInput | undefined;
+  if (attachmentFile instanceof File) {
+    const result = await validateAttachmentFile(attachmentFile);
+    if (!result.ok) {
+      return NextResponse.json({ error: result.error }, { status: 400 });
+    }
+    attachment = result.attachment;
+  }
+
   let ticket;
   try {
     ticket = await prisma.ticket.create({
@@ -72,6 +81,16 @@ export async function POST(request: NextRequest) {
         message: message.trim(),
         status: "Open",
         ownerId: user.id,
+        attachments: attachment
+          ? {
+              create: {
+                filename: attachment.filename,
+                mimeType: attachment.mimeType,
+                size: attachment.size,
+                data: attachment.buffer,
+              },
+            }
+          : undefined,
       },
     });
   } catch (error) {
