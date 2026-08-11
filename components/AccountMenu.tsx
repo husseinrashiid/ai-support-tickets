@@ -58,7 +58,7 @@ export function AccountMenu({ email, role }: { email: string; role: string }) {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-[calc(100%+8px)] z-20 w-56 overflow-hidden rounded-xl border border-zinc-200 bg-white p-1.5 shadow-lg dark:border-zinc-800 dark:bg-zinc-900"
+          className="absolute right-0 top-[calc(100%+8px)] z-20 w-[230px] overflow-hidden rounded-xl border border-zinc-200 bg-white p-1.5 shadow-lg dark:border-zinc-800 dark:bg-zinc-900"
         >
           <div className="flex items-center gap-3 px-2.5 py-2.5">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-blue/10 text-sm font-bold text-brand-blue dark:bg-brand-blue/20 dark:text-sky-400">{initial}</span>
@@ -73,7 +73,7 @@ export function AccountMenu({ email, role }: { email: string; role: string }) {
             role="menuitem"
             onClick={handleLogout}
             disabled={loggingOut}
-            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-zinc-700 transition-colors hover:bg-zinc-100 disabled:opacity-60 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-zinc-700 transition-colors hover:bg-zinc-100 disabled:opacity-60 dark:text-zinc-300 dark:hover:bg-[#24262b]"
           >
             <SignOutIcon />
             {loggingOut ? "Logging out…" : "Log out"}

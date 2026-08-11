@@ -85,7 +85,7 @@ export function TicketStatusControl({
         disabled={saving}
         aria-haspopup="menu"
         aria-expanded={open}
-        className={`flex items-center gap-2 rounded-full border bg-white px-4 py-2 text-sm font-semibold transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-zinc-900 dark:hover:bg-zinc-800 ${
+        className={`group flex items-center gap-2 rounded-full border bg-white px-4 py-2 text-sm font-semibold transition-colors hover:border-zinc-400 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-zinc-900 dark:hover:border-zinc-600 dark:hover:bg-zinc-800 ${
           isClosed
             ? "border-zinc-200 dark:border-zinc-800"
             : "border-zinc-300 dark:border-zinc-700"
@@ -151,7 +151,7 @@ function ChevronDownIcon() {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="h-4 w-4 text-zinc-400"
+      className="h-4 w-4 text-zinc-400 transition-colors group-hover:text-zinc-600 dark:group-hover:text-zinc-300"
     >
       <path d="M6 9l6 6 6-6" />
     </svg>
