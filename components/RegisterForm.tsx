@@ -6,10 +6,12 @@ import { useRouter } from "next/navigation";
 import { isPasswordStrong } from "@/lib/password";
 import { PasswordInput } from "@/components/PasswordInput";
 
-const PASSWORD_HINT_TEXT = "8+ characters, including a number and special character";
+const PASSWORD_HINT_TEXT = "8+ characters with a number and special character";
 
 const inputClasses =
   "h-[46px] rounded-lg border border-zinc-300 bg-white px-3 text-sm text-zinc-900 outline-none transition-colors focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/30 disabled:opacity-60 dark:border-zinc-500 dark:bg-zinc-900 dark:text-zinc-50";
+const invalidInputClasses =
+  "h-[46px] rounded-lg border border-brand-red/65 bg-white px-3 text-sm text-zinc-900 outline-none transition-colors focus:ring-0 disabled:opacity-60 dark:bg-zinc-900 dark:text-zinc-50";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -22,6 +24,7 @@ export function RegisterForm() {
   const [confirmPasswordFocused, setConfirmPasswordFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailExists, setEmailExists] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const passwordInvalid = passwordTouched && !isPasswordStrong(password);
@@ -38,6 +41,7 @@ export function RegisterForm() {
   async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+    setEmailExists(false);
 
     const passwordOk = isPasswordStrong(password);
     const confirmOk = confirmPassword.length > 0 && confirmPassword === password;
@@ -68,7 +72,11 @@ export function RegisterForm() {
       };
 
       if (!res.ok || !data.user) {
-        setError(data.error ?? "Something went wrong. Please try again.");
+        if (res.status === 409) {
+          setEmailExists(true);
+        } else {
+          setError(data.error ?? "Something went wrong. Please try again.");
+        }
         setSubmitting(false);
         return;
       }
@@ -96,11 +104,22 @@ export function RegisterForm() {
           type="email"
           required
           value={email}
-          onChange={(event) => setEmail(event.target.value)}
+          onChange={(event) => {
+            setEmail(event.target.value);
+            if (emailExists) setEmailExists(false);
+          }}
           disabled={submitting}
           placeholder="you@example.com"
-          className={inputClasses}
+          className={emailExists ? invalidInputClasses : inputClasses}
         />
+        {emailExists && (
+          <p className="mb-[-2px] text-[13px] text-[#e06b6b]">
+            Email already registered.{" "}
+            <Link href="/login" className="text-brand-blue no-underline hover:underline dark:text-sky-400">
+              Log in instead.
+            </Link>
+          </p>
+        )}
       </div>
 
       <div className="flex flex-col gap-4">
