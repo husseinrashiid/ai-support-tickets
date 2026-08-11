@@ -84,7 +84,6 @@ export function SuggestedResponseEditor({
       setSavedValue(data.ticket.aiSuggestedResponse ?? "");
       setExpanded(true);
       setRegenerating(false);
-      setStatusMessage("New suggestion generated.");
       router.refresh();
     } catch {
       setError("Could not reach the server. Please try again.");
@@ -107,8 +106,8 @@ export function SuggestedResponseEditor({
       >
         <span className="flex items-center gap-2">
           <ChevronIcon expanded={expanded} />
-          <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
-            AI suggested response <span className="text-zinc-400 dark:text-zinc-500">· Internal</span>
+          <span className="text-xs font-medium text-zinc-500 dark:text-zinc-500">
+            AI suggested response <span className="text-zinc-400 dark:text-zinc-600">· Internal</span>
           </span>
         </span>
       </button>
@@ -121,10 +120,10 @@ export function SuggestedResponseEditor({
               setValue(event.target.value);
               setStatusMessage(null);
             }}
-            rows={4}
+            rows={3}
             disabled={regenerating || saving}
             placeholder="No AI suggested response yet — write one manually."
-            className="min-h-[84px] w-full resize-y rounded-xl border border-zinc-400 bg-white px-3 py-2 text-sm text-zinc-700 outline-none transition-colors placeholder:text-zinc-400 focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/30 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:placeholder:text-zinc-500"
+            className="min-h-[68px] w-full resize-y rounded-xl border border-zinc-400 bg-white px-3 py-2 text-sm text-zinc-700 outline-none transition-colors placeholder:text-zinc-400 focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/30 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:placeholder:text-zinc-500"
           />
           {error && (
             <p role="alert" className="mt-2 text-xs text-brand-red">
