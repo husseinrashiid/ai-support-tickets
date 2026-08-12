@@ -1,17 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { analyzeTicket } from "@/lib/ai";
-import { getCurrentUser } from "@/lib/auth";
 import { validateAttachmentFile, type AttachmentInput } from "@/lib/attachments";
+import { requireUser, parseFormData } from "@/lib/api-helpers";
 
 export async function GET() {
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: "Authentication required." }, { status: 401 });
-  }
-  if (user.role !== "agent") {
-    return NextResponse.json({ error: "Forbidden." }, { status: 403 });
-  }
+  const user = await requireUser("agent");
+  if (user instanceof NextResponse) return user;
 
   try {
     const tickets = await prisma.ticket.findMany({
@@ -28,23 +23,11 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: "Authentication required." }, { status: 401 });
-  }
-  if (user.role !== "customer") {
-    return NextResponse.json({ error: "Forbidden." }, { status: 403 });
-  }
+  const user = await requireUser("customer");
+  if (user instanceof NextResponse) return user;
 
-  let formData: FormData;
-  try {
-    formData = await request.formData();
-  } catch {
-    return NextResponse.json(
-      { error: "Request body must be valid form data." },
-      { status: 400 }
-    );
-  }
+  const formData = await parseFormData(request);
+  if (formData instanceof NextResponse) return formData;
 
   const title = formData.get("title");
   const message = formData.get("message");

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/auth";
+import { requireUser, isForbiddenForCustomer } from "@/lib/api-helpers";
 
 export async function GET(
   _request: Request,
@@ -8,15 +8,13 @@ export async function GET(
 ) {
   const { id } = await params;
 
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: "Authentication required." }, { status: 401 });
-  }
+  const user = await requireUser();
+  if (user instanceof NextResponse) return user;
 
   try {
     const ticket = await prisma.ticket.findUnique({ where: { id } });
 
-    if (!ticket || (user.role === "customer" && ticket.ownerId !== user.id)) {
+    if (!ticket || isForbiddenForCustomer(user, ticket.ownerId)) {
       return NextResponse.json(
         { error: "Ticket not found." },
         { status: 404 }
