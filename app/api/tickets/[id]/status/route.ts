@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { TICKET_STATUSES } from "@/lib/constants";
-import { getCurrentUser } from "@/lib/auth";
+import { requireUser, parseJsonBody, notFoundOnRecordMissing } from "@/lib/api-helpers";
 
 export async function PATCH(
   request: NextRequest,
@@ -10,25 +9,13 @@ export async function PATCH(
 ) {
   const { id } = await params;
 
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: "Authentication required." }, { status: 401 });
-  }
-  if (user.role !== "agent") {
-    return NextResponse.json({ error: "Forbidden." }, { status: 403 });
-  }
+  const user = await requireUser("agent");
+  if (user instanceof NextResponse) return user;
 
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json(
-      { error: "Request body must be valid JSON." },
-      { status: 400 }
-    );
-  }
+  const body = await parseJsonBody<{ status?: unknown }>(request);
+  if (body instanceof NextResponse) return body;
 
-  const { status } = (body ?? {}) as { status?: unknown };
+  const { status } = body ?? {};
 
   if (
     typeof status !== "string" ||
@@ -47,15 +34,9 @@ export async function PATCH(
     });
     return NextResponse.json({ ticket });
   } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2025"
-    ) {
-      return NextResponse.json(
-        { error: "Ticket not found." },
-        { status: 404 }
-      );
-    }
+    const notFound = notFoundOnRecordMissing(error);
+    if (notFound) return notFound;
+
     console.error(`PATCH /api/tickets/${id}/status failed:`, error);
     return NextResponse.json(
       { error: "Failed to update ticket status." },
