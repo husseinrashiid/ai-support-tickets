@@ -11,7 +11,9 @@ export async function GET() {
       prisma.ticket.count(),
       prisma.ticket.count({ where: { status: "Open" } }),
       prisma.ticket.count({ where: { status: { in: ["Resolved", "Closed"] } } }),
-      prisma.ticket.count({ where: { priority: "Urgent" } }),
+      prisma.ticket.count({
+        where: { priority: "Urgent", status: { notIn: ["Resolved", "Closed"] } },
+      }),
     ]);
 
     return NextResponse.json({ total, open, resolved, urgent });
