@@ -22,12 +22,14 @@ export async function Nav() {
         <div className="flex items-center gap-4">
           {user ? (
             <>
-              <Link
-                href={user.role === "agent" ? "/" : "/my-tickets"}
-                className="text-sm font-medium text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
-              >
-                {user.role === "agent" ? "Dashboard" : "My Tickets"}
-              </Link>
+              {user.role === "agent" && (
+                <Link
+                  href="/"
+                  className="text-sm font-medium text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+                >
+                  Dashboard
+                </Link>
+              )}
               <AccountMenu email={user.email} role={user.role} />
             </>
           ) : (
