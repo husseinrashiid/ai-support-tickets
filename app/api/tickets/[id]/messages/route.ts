@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/auth";
 import { MESSAGE_WRITABLE_STATUSES } from "@/lib/constants";
 import { validateAttachmentFile, type AttachmentInput } from "@/lib/attachments";
+import { requireUser, parseFormData, isForbiddenForCustomer } from "@/lib/api-helpers";
 
 export async function GET(
   _request: NextRequest,
@@ -10,15 +10,13 @@ export async function GET(
 ) {
   const { id } = await params;
 
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: "Authentication required." }, { status: 401 });
-  }
+  const user = await requireUser();
+  if (user instanceof NextResponse) return user;
 
   try {
     const ticket = await prisma.ticket.findUnique({ where: { id } });
 
-    if (!ticket || (user.role === "customer" && ticket.ownerId !== user.id)) {
+    if (!ticket || isForbiddenForCustomer(user, ticket.ownerId)) {
       return NextResponse.json({ error: "Ticket not found." }, { status: 404 });
     }
 
@@ -44,20 +42,11 @@ export async function POST(
 ) {
   const { id } = await params;
 
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: "Authentication required." }, { status: 401 });
-  }
+  const user = await requireUser();
+  if (user instanceof NextResponse) return user;
 
-  let formData: FormData;
-  try {
-    formData = await request.formData();
-  } catch {
-    return NextResponse.json(
-      { error: "Request body must be valid form data." },
-      { status: 400 }
-    );
-  }
+  const formData = await parseFormData(request);
+  if (formData instanceof NextResponse) return formData;
 
   const content = formData.get("content");
   const attachmentFile = formData.get("attachment");
@@ -81,7 +70,7 @@ export async function POST(
   try {
     const ticket = await prisma.ticket.findUnique({ where: { id } });
 
-    if (!ticket || (user.role === "customer" && ticket.ownerId !== user.id)) {
+    if (!ticket || isForbiddenForCustomer(user, ticket.ownerId)) {
       return NextResponse.json({ error: "Ticket not found." }, { status: 404 });
     }
 
