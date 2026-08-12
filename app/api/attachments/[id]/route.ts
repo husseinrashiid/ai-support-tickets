@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/auth";
+import { requireUser, isForbiddenForCustomer } from "@/lib/api-helpers";
 
 export async function GET(
   _request: NextRequest,
@@ -8,10 +8,8 @@ export async function GET(
 ) {
   const { id } = await params;
 
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: "Authentication required." }, { status: 401 });
-  }
+  const user = await requireUser();
+  if (user instanceof NextResponse) return user;
 
   const attachment = await prisma.attachment.findUnique({
     where: { id },
@@ -26,7 +24,7 @@ export async function GET(
   }
 
   const ownerId = attachment.ticket?.ownerId ?? attachment.message?.ticket.ownerId;
-  if (user.role === "customer" && ownerId !== user.id) {
+  if (isForbiddenForCustomer(user, ownerId)) {
     return NextResponse.json({ error: "Attachment not found." }, { status: 404 });
   }
 

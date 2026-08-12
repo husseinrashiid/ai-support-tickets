@@ -3,25 +3,16 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { createSessionToken, hashPassword, setSessionCookie } from "@/lib/auth";
 import { PASSWORD_REQUIREMENTS_TEXT, isPasswordStrong } from "@/lib/password";
+import { parseJsonBody } from "@/lib/api-helpers";
 
 // Public registration always creates a customer account. Agent accounts are
-// provisioned out-of-band (see prisma/seed.ts) so a visitor can never grant
-// themselves access to other customers' tickets by posting role: "agent".
+// provisioned out-of-band (see prisma/create-agent.js) so a visitor can never
+// grant themselves access to other customers' tickets by posting role: "agent".
 export async function POST(request: NextRequest) {
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json(
-      { error: "Request body must be valid JSON." },
-      { status: 400 }
-    );
-  }
+  const body = await parseJsonBody<{ email?: unknown; password?: unknown }>(request);
+  if (body instanceof NextResponse) return body;
 
-  const { email, password } = (body ?? {}) as {
-    email?: unknown;
-    password?: unknown;
-  };
+  const { email, password } = body ?? {};
 
   if (typeof email !== "string" || email.trim().length === 0) {
     return NextResponse.json({ error: "Email is required." }, { status: 400 });

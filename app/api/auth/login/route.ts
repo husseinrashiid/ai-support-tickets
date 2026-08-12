@@ -1,22 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSessionToken, setSessionCookie, verifyPassword } from "@/lib/auth";
+import { parseJsonBody } from "@/lib/api-helpers";
 
 export async function POST(request: NextRequest) {
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json(
-      { error: "Request body must be valid JSON." },
-      { status: 400 }
-    );
-  }
+  const body = await parseJsonBody<{ email?: unknown; password?: unknown }>(request);
+  if (body instanceof NextResponse) return body;
 
-  const { email, password } = (body ?? {}) as {
-    email?: unknown;
-    password?: unknown;
-  };
+  const { email, password } = body ?? {};
 
   if (typeof email !== "string" || typeof password !== "string") {
     return NextResponse.json(
