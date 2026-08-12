@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import { useClickOutside } from "@/hooks/useClickOutside";
+import { CheckIcon, ChevronDownIcon } from "@/components/icons/MenuIcons";
 
 const OPTIONS: {
   label: string;
@@ -19,27 +21,7 @@ export function SortDropdown({
   onChange: (sort: "asc" | "desc") => void;
 }) {
   const [open, setOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-
-    function handlePointerDown(event: PointerEvent) {
-      if (!containerRef.current?.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    }
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
-    }
-
-    document.addEventListener("pointerdown", handlePointerDown);
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("pointerdown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [open]);
+  const containerRef = useClickOutside<HTMLDivElement>(open, setOpen);
 
   const current = OPTIONS.find((option) => option.value === sort) ?? OPTIONS[0];
 
@@ -128,38 +110,6 @@ function ArrowUpIcon({ className }: { className?: string }) {
       className={className}
     >
       <path d="M12 20V4M6 10l6-6 6 6" />
-    </svg>
-  );
-}
-
-function CheckIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="h-3.5 w-3.5 shrink-0"
-    >
-      <path d="M20 6L9 17l-5-5" />
-    </svg>
-  );
-}
-
-function ChevronDownIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="h-4 w-4 text-zinc-400"
-    >
-      <path d="M6 9l6 6 6-6" />
     </svg>
   );
 }

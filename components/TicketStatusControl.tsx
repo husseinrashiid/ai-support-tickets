@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { TICKET_STATUSES } from "@/lib/constants";
 import { DEFAULT_STATUS_STYLE, STATUS_STYLES } from "@/lib/ticket-display";
+import { useClickOutside } from "@/hooks/useClickOutside";
 
 const OPEN_STATUSES = TICKET_STATUSES.filter((status) => status !== "Closed");
 
@@ -19,30 +20,10 @@ export function TicketStatusControl({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useClickOutside<HTMLDivElement>(open, setOpen);
 
   const statusStyle = STATUS_STYLES[status] ?? DEFAULT_STATUS_STYLE;
   const isClosed = status === "Closed";
-
-  useEffect(() => {
-    if (!open) return;
-
-    function handlePointerDown(event: PointerEvent) {
-      if (!containerRef.current?.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    }
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
-    }
-
-    document.addEventListener("pointerdown", handlePointerDown);
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("pointerdown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [open]);
 
   async function updateStatus(nextStatus: string) {
     setOpen(false);
