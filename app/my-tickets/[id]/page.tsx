@@ -98,21 +98,26 @@ export default async function CustomerTicketDetailsPage({
                 {ticket.priority}
               </span>
             )}
-            {!hasSentResponse && (
-              <span className={NEEDS_REVIEW_BADGE_CLASSES}>Awaiting response</span>
+            {!hasSentResponse && ticket.status !== "Closed" && (
+              <span className="flex items-center gap-1.5 font-medium text-amber-700 dark:text-amber-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                Awaiting response
+              </span>
             )}
           </p>
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_335px]">
-          <MessageThread
-            ticketId={ticket.id}
-            status={ticket.status}
-            viewerId={user.id}
-            initialMessages={messages}
-            leadingEntries={leadingEntries}
-            awaitingResponse={!hasSentResponse}
-          />
+          <div className={ticket.status === "Closed" ? "lg:self-start" : undefined}>
+            <MessageThread
+              ticketId={ticket.id}
+              status={ticket.status}
+              viewerId={user.id}
+              initialMessages={messages}
+              leadingEntries={leadingEntries}
+              awaitingResponse={!hasSentResponse}
+            />
+          </div>
 
           <aside className="rounded-[14px] border border-zinc-200 bg-white px-5 py-4 dark:border-zinc-800 dark:bg-zinc-900 lg:h-fit">
             <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-300">

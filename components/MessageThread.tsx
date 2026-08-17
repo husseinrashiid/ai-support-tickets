@@ -158,15 +158,11 @@ export const MessageThread = forwardRef<
         )}
       </div>
 
-      {awaitingResponse && (
-        <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 dark:border-amber-800/40 dark:bg-amber-950/20">
-          <p className="text-sm font-medium text-amber-800 dark:text-amber-400">
-            Awaiting support response
-          </p>
-          <p className="text-xs text-amber-700/80 dark:text-amber-500/70">
-            Our team is reviewing your ticket.
-          </p>
-        </div>
+      {awaitingResponse && status !== "Closed" && (
+        <p className="mt-2 flex items-center gap-2 pl-5 text-[13px] text-amber-700/90 dark:text-amber-500/80">
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
+          Waiting for support response.
+        </p>
       )}
 
       {canWrite ? (
@@ -203,6 +199,15 @@ export const MessageThread = forwardRef<
               </button>
             </div>
           </div>
+        </div>
+      ) : status === "Closed" ? (
+        <div className="mt-[18px] border-t border-zinc-200 pt-[18px] dark:border-zinc-800">
+          <p className="text-sm font-medium text-zinc-600 dark:text-zinc-300">
+            This ticket is closed.
+          </p>
+          <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+            New messages are disabled.
+          </p>
         </div>
       ) : (
         <p className="mt-[18px] border-t border-zinc-200 pt-[18px] text-xs text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
