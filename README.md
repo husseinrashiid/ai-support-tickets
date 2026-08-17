@@ -139,12 +139,12 @@ If the AI request times out, is refused, or returns invalid data:
 - Attachments are stored directly in PostgreSQL rather than object storage.
 - Long conversations are sent to the AI in full and are not summarized or truncated yet.
 - No automated test suite yet.
+- Login/register rate limiting is an in-memory, per-process counter (`lib/rate-limit.ts`) — fine for a single instance, but resets on restart and wouldn't be shared across multiple instances behind a load balancer.
 
 ## Possible future improvements
 
 - Password reset flow.
 - Two-factor authentication (2FA), especially for agent accounts.
-- Rate limiting on `/api/auth/login` and `/api/auth/register` to slow down credential stuffing.
 - Object storage (e.g. S3) for attachments instead of storing bytes in Postgres, for larger files.
 - Real-time conversation updates (polling or websockets) instead of a manual refresh after sending a message.
 - Multiple attachments per message instead of one.
