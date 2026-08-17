@@ -134,6 +134,10 @@ If the AI request times out, is refused, or returns invalid data:
 - fallback values are used where needed
 - the agent can retry analysis from the ticket page
 
+### Limitations of the AI feature
+
+`claude-haiku-4-5` was chosen for speed and cost over maximum accuracy, since triage is a bounded classification/drafting task rather than deep reasoning. That means it can still misclassify an ambiguous ticket or draft a reply that needs editing — which is why the suggested response is always presented as an editable draft for an agent to review, never sent automatically.
+
 ## Known limitations
 
 - Attachments are stored directly in PostgreSQL rather than object storage.
