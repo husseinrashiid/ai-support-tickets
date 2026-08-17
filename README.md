@@ -64,21 +64,29 @@ npx prisma generate         # regenerate the Prisma client (also runs automatica
 
 The four models are `User`, `Ticket`, `Message`, and `Attachment` (attachments belong to either a ticket or a message).
 
+## Test credentials
+
+**Agent** (pre-created, ready to use):
+
+| Email | Password |
+|---|---|
+| `agent@example.com` | `Agent123!` |
+
+**Customer:** there's no fixed account — register your own at `/register` (tickets are scoped to whichever customer creates them, so a fresh account is the natural way to test the customer flow).
+
 ## Create an agent account
 
-Agent accounts cannot be created through public registration.
-
-To create one locally:
+Agent accounts cannot be created through public registration. To create another one:
 
 ```bash
-npm run create-agent -- agent@example.com Agent123!
+npm run create-agent -- <email> <password>
 ```
 
 The script hashes the password and upserts a user with `role: "agent"` directly into the database.
 
-You can then log in with those credentials to access the agent dashboard.
+## Sample data
 
-Customer accounts are created normally through `/register`.
+No seed script is included — the app is fully usable from an empty database: register a customer account, submit a ticket (AI analysis runs automatically), then log in as the agent above to triage it. Nothing is gated behind data you can't produce yourself through the UI.
 
 ## How it works
 
@@ -131,6 +139,16 @@ If the AI request times out, is refused, or returns invalid data:
 - Attachments are stored directly in PostgreSQL rather than object storage.
 - Long conversations are sent to the AI in full and are not summarized or truncated yet.
 - No automated test suite yet.
+
+## Possible future improvements
+
+- Password reset flow.
+- Two-factor authentication (2FA), especially for agent accounts.
+- Rate limiting on `/api/auth/login` and `/api/auth/register` to slow down credential stuffing.
+- Object storage (e.g. S3) for attachments instead of storing bytes in Postgres, for larger files.
+- Real-time conversation updates (polling or websockets) instead of a manual refresh after sending a message.
+- Multiple attachments per message instead of one.
+- Automated test suite (unit and integration tests).
 
 ## Repository notes
 
