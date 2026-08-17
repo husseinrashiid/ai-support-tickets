@@ -22,6 +22,10 @@ export function SuggestedResponseEditor({
   const [savedValue, setSavedValue] = useState(initialValue);
 
   useEffect(() => {
+    // Re-syncs the local draft when the server gives us a fresh initialValue
+    // (e.g. after router.refresh() on regenerate/save) for the same ticket —
+    // a key-based remount isn't applicable since ticketId doesn't change here.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setValue(initialValue);
     setSavedValue(initialValue);
   }, [initialValue]);

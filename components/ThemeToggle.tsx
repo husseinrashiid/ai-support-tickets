@@ -7,6 +7,9 @@ export function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Reads the class the pre-hydration script in layout.tsx already applied to
+    // <html> — that value doesn't exist during SSR, so it can't be computed at render time.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsDark(document.documentElement.classList.contains("dark"));
     setMounted(true);
   }, []);
