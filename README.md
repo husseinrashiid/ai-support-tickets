@@ -128,8 +128,6 @@ If the AI request times out, is refused, or returns invalid data:
 
 ## Known limitations
 
-- No password-reset flow yet.
-- Only one image attachment is supported per ticket or message.
 - Attachments are stored directly in PostgreSQL rather than object storage.
 - Long conversations are sent to the AI in full and are not summarized or truncated yet.
 - No automated test suite yet.
