@@ -31,7 +31,7 @@ export default async function TicketDetailsPage({
   const { id } = await params;
   const ticket = await prisma.ticket.findUnique({
     where: { id },
-    include: { attachments: true },
+    include: { attachments: { omit: { data: true } } },
   });
 
   if (!ticket) {
@@ -41,7 +41,7 @@ export default async function TicketDetailsPage({
   const messages = await prisma.message.findMany({
     where: { ticketId: id },
     orderBy: { createdAt: "asc" },
-    include: { attachments: true },
+    include: { attachments: { omit: { data: true } } },
   });
 
   const priorityStyle = ticket.priority
