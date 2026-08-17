@@ -59,21 +59,21 @@ export function TicketStatusControl({
   }
 
   return (
-    <div ref={containerRef} className="relative inline-block w-fit shrink-0">
+    <div ref={containerRef} className="relative -ml-1 inline-block w-fit shrink-0">
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
         disabled={saving}
         aria-haspopup="menu"
         aria-expanded={open}
-        className={`group flex items-center gap-2 rounded-full border bg-white px-4 py-2 text-sm font-semibold transition-colors hover:border-zinc-400 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-zinc-900 dark:hover:border-zinc-600 dark:hover:bg-zinc-800 ${
+        className={`group flex items-center gap-1.5 rounded-full border bg-white py-2 pl-4 pr-3 text-sm font-semibold transition-colors hover:border-zinc-400 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-zinc-900 dark:hover:border-zinc-600 dark:hover:bg-zinc-800 ${
           isClosed
             ? "border-zinc-200 dark:border-zinc-800"
             : "border-zinc-300 dark:border-zinc-700"
         } ${statusStyle.text}`}
       >
-        <span className={`h-1.5 w-1.5 rounded-full ${statusStyle.dot}`} />
-        {status}
+        <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${statusStyle.dot}`} />
+        <span>{status}</span>
         <ChevronDownIcon />
       </button>
 
@@ -132,7 +132,7 @@ function ChevronDownIcon() {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="h-4 w-4 text-zinc-400 transition-colors group-hover:text-zinc-600 dark:group-hover:text-zinc-300"
+      className="h-3.5 w-3.5 shrink-0 text-zinc-400 transition-colors group-hover:text-zinc-600 dark:group-hover:text-zinc-300"
     >
       <path d="M6 9l6 6 6-6" />
     </svg>

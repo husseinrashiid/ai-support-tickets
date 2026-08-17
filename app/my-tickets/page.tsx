@@ -17,7 +17,7 @@ export default async function MyTicketsPage() {
   });
 
   return (
-    <div className="dashboard-glow flex min-h-full flex-1 flex-col">
+    <div className="flex min-h-full flex-1 flex-col bg-[#f4f5f7] dark:bg-[#08090b]">
       <div className="mx-auto flex w-[min(1120px,calc(100%-48px))] flex-1 flex-col pt-[42px] pb-14 sm:pb-16">
         <header className="mb-7 flex items-start justify-between gap-4 border-b border-zinc-200 pb-6 dark:border-zinc-800">
           <div>
