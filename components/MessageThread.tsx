@@ -12,7 +12,10 @@ const CONTENT_LIMIT = 500;
 
 type Variant = "customer" | "agent";
 
-export type MessageWithAttachments = Message & { attachments: Attachment[] };
+// The API omits the attachment's raw bytes from every response that isn't
+// the dedicated /api/attachments/[id] download route - the UI only ever
+// needs id/filename to build that download URL.
+export type MessageWithAttachments = Message & { attachments: Omit<Attachment, "data">[] };
 
 export type LeadingEntry = {
   key: string;

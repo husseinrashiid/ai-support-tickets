@@ -23,7 +23,9 @@ export async function GET(
     const messages = await prisma.message.findMany({
       where: { ticketId: id },
       orderBy: { createdAt: "asc" },
-      include: { attachments: true },
+      // The UI only ever needs id/filename (it loads the actual image via
+      // /api/attachments/[id]), so leave the attachment bytes out of this payload.
+      include: { attachments: { omit: { data: true } } },
     });
 
     return NextResponse.json({ messages });
@@ -81,8 +83,11 @@ export async function POST(
       );
     }
 
-    const message = await prisma.$transaction(async (tx) => {
-      const created = await tx.message.create({
+    // Sequential (array-form) transaction rather than an interactive one: the
+    // timestamp bump doesn't depend on the message's result, so Prisma can send
+    // both statements as one batch instead of round-tripping on our JS between them.
+    const [message] = await prisma.$transaction([
+      prisma.message.create({
         data: {
           ticketId: id,
           senderId: user.id,
@@ -99,14 +104,13 @@ export async function POST(
               }
             : undefined,
         },
-        include: { attachments: true },
-      });
-      await tx.ticket.update({
+        include: { attachments: { omit: { data: true } } },
+      }),
+      prisma.ticket.update({
         where: { id },
         data: { updatedAt: new Date() },
-      });
-      return created;
-    });
+      }),
+    ]);
 
     return NextResponse.json({ message }, { status: 201 });
   } catch (error) {
