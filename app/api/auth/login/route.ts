@@ -2,8 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSessionToken, setSessionCookie, verifyPassword } from "@/lib/auth";
 import { parseJsonBody } from "@/lib/api-helpers";
+import { getClientIp, isRateLimited } from "@/lib/rate-limit";
+
+const LOGIN_LIMIT = 10;
+const LOGIN_WINDOW_MS = 5 * 60 * 1000;
 
 export async function POST(request: NextRequest) {
+  const ip = getClientIp(request);
+  if (isRateLimited(`login:${ip}`, LOGIN_LIMIT, LOGIN_WINDOW_MS)) {
+    return NextResponse.json(
+      { error: "Too many login attempts. Please try again in a few minutes." },
+      { status: 429 }
+    );
+  }
+
   const body = await parseJsonBody<{ email?: unknown; password?: unknown }>(request);
   if (body instanceof NextResponse) return body;
 

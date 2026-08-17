@@ -4,11 +4,23 @@ import { prisma } from "@/lib/prisma";
 import { createSessionToken, hashPassword, setSessionCookie } from "@/lib/auth";
 import { PASSWORD_REQUIREMENTS_TEXT, isPasswordStrong } from "@/lib/password";
 import { parseJsonBody } from "@/lib/api-helpers";
+import { getClientIp, isRateLimited } from "@/lib/rate-limit";
+
+const REGISTER_LIMIT = 5;
+const REGISTER_WINDOW_MS = 60 * 60 * 1000;
 
 // Public registration always creates a customer account. Agent accounts are
-// provisioned out-of-band (see prisma/create-agent.js) so a visitor can never
+// provisioned out-of-band (see prisma/create-agent.mjs) so a visitor can never
 // grant themselves access to other customers' tickets by posting role: "agent".
 export async function POST(request: NextRequest) {
+  const ip = getClientIp(request);
+  if (isRateLimited(`register:${ip}`, REGISTER_LIMIT, REGISTER_WINDOW_MS)) {
+    return NextResponse.json(
+      { error: "Too many accounts created from this network. Please try again later." },
+      { status: 429 }
+    );
+  }
+
   const body = await parseJsonBody<{ email?: unknown; password?: unknown }>(request);
   if (body instanceof NextResponse) return body;
 
