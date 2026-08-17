@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "create-agent": "node prisma/create-agent.js"
+    "create-agent": "node prisma/create-agent.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.112.4",

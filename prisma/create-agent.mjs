@@ -3,8 +3,8 @@
 // so this script is the supported way to grant agent access.
 //
 // Usage: npm run create-agent -- <email> <password>
-const bcrypt = require("bcryptjs");
-const { PrismaClient } = require("@prisma/client");
+import bcrypt from "bcryptjs";
+import { PrismaClient } from "@prisma/client";
 
 async function main() {
   const [email, password] = process.argv.slice(2);
