@@ -6,13 +6,13 @@ An AI-powered customer support ticket system. Customers submit tickets and messa
 
 **Core ticket flow**
 - Submit a ticket (title + message, optional image attachment).
-- On submission, Claude analyzes the ticket and returns a summary, category, priority, and a suggested first response.
+- On submission, Claude analyzes the ticket in the background and returns a summary, category, priority, and a suggested first response - ticket creation returns immediately rather than waiting on the AI call.
 - Agents can edit and save the suggested response, and retry AI analysis if it failed or the ticket has no category yet.
 - Agent dashboard with ticket counts (open / in progress / completed / total), plus filtering, sorting, and pagination over the ticket list. Filters, sort, and page are preserved when opening a ticket and navigating back.
 
 **Authentication and roles**
 - Email/password auth with signed session cookies (`jose` JWT, `bcryptjs` password hashing).
-- Login is rate-limited, and an account is locked out for 5 minutes after 5 consecutive failed login attempts from the same IP.
+- Login is rate-limited, and after 5 consecutive failed attempts for the same email from the same IP, that email is locked out from that IP for 5 minutes.
 - Two roles: **customer** (owns and manages only their own tickets) and **agent** (sees and manages every ticket).
 - Public registration always creates a customer account — agent accounts can't be self-registered, only provisioned via the `create-agent` script.
 - Every API route and page re-checks the session and role server-side; hiding a link in the UI is never the only guard.
@@ -104,7 +104,7 @@ When a customer creates a ticket, the AI returns:
 - priority
 - suggested first response
 
-The response is constrained to structured JSON and validated before being stored.
+The response is constrained to structured JSON and validated before being stored. Analysis runs after the ticket is saved (via Next.js's `after()`) rather than blocking the create request, so a newly created ticket briefly shows as unclassified ("Needs review") until analysis finishes and the page is refreshed.
 
 ### Conversation replies
 
