@@ -44,7 +44,7 @@ export const PRIORITY_STYLES: Record<string, { bar: string; text: string }> = {
   Urgent: { bar: "bg-brand-red", text: "text-brand-red" },
   High: { bar: "bg-orange-500", text: "text-orange-600 dark:text-orange-400" },
   Medium: { bar: "bg-amber-400 dark:bg-amber-500", text: "text-amber-600 dark:text-amber-400" },
-  Low: { bar: "bg-zinc-300 dark:bg-zinc-600", text: "text-zinc-500 dark:text-zinc-400" },
+  Low: { bar: "bg-zinc-400 dark:bg-zinc-500", text: "text-zinc-500 dark:text-zinc-400" },
 };
 
 export const DEFAULT_PRIORITY_STYLE = {

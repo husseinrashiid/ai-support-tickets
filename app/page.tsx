@@ -60,13 +60,22 @@ export default async function Home({
   };
   const hasActiveFilters = Boolean(status || category || priority);
 
-  const [total, open, resolved, urgent, matchingTotal, tickets] = await Promise.all([
+  const listSearch = new URLSearchParams();
+  if (status) listSearch.set("status", status);
+  if (category) listSearch.set("category", category);
+  if (priority) listSearch.set("priority", priority);
+  if (sort !== "desc") listSearch.set("sort", sort);
+  if (page !== 1) listSearch.set("page", String(page));
+  if (pageSize !== DEFAULT_TICKET_PAGE_SIZE) listSearch.set("pageSize", String(pageSize));
+  const listQueryString = listSearch.toString();
+  const ticketHref = (id: string) =>
+    `/tickets/${id}${listQueryString ? `?from=${encodeURIComponent(listQueryString)}` : ""}`;
+
+  const [total, open, inProgress, completed, matchingTotal, tickets] = await Promise.all([
     prisma.ticket.count(),
     prisma.ticket.count({ where: { status: "Open" } }),
+    prisma.ticket.count({ where: { status: "In Progress" } }),
     prisma.ticket.count({ where: { status: { in: ["Resolved", "Closed"] } } }),
-    prisma.ticket.count({
-      where: { priority: "Urgent", status: { notIn: ["Resolved", "Closed"] } },
-    }),
     prisma.ticket.count({ where }),
     prisma.ticket.findMany({
       where,
@@ -86,17 +95,12 @@ export default async function Home({
             Tickets
             <span className="ml-1 text-brand-blue">.</span>
           </h1>
-          <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-            {urgent > 0
-              ? `${urgent} need${urgent === 1 ? "s" : ""} attention today`
-              : "No urgent tickets"}
-          </p>
         </header>
 
         <section className="mb-7 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <StatCard label="Urgent" value={urgent} accent="text-brand-red" />
-          <StatCard label="Open" value={open} />
-          <StatCard label="Resolved" value={resolved} />
+          <StatCard label="Open" value={open} accent="text-brand-blue/80 dark:text-brand-blue/70" />
+          <StatCard label="In Progress" value={inProgress} accent="text-indigo-500/80 dark:text-indigo-400/70" />
+          <StatCard label="Completed" value={completed} accent="text-green-600/80 dark:text-green-500/70" />
           <StatCard label="Total" value={total} />
         </section>
 
@@ -105,7 +109,7 @@ export default async function Home({
         </div>
 
         <section className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
-          <div className="hidden grid-cols-[1fr_auto_2.5rem] gap-4 border-b border-zinc-200 bg-zinc-50 px-5 py-3.5 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-400 sm:grid">
+          <div className="hidden grid-cols-[1fr_auto_2.5rem] gap-4 border-b border-zinc-200 bg-zinc-50 px-5 py-3.5 text-xs font-semibold uppercase tracking-wide text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-300 sm:grid">
             <span>Ticket</span>
             <span>Status</span>
             <span className="text-right">Age</span>
@@ -118,7 +122,9 @@ export default async function Home({
                   : "No tickets yet. Create the first one to get started."}
               </li>
             ) : (
-              tickets.map((ticket) => <TicketRow key={ticket.id} ticket={ticket} />)
+              tickets.map((ticket) => (
+                <TicketRow key={ticket.id} ticket={ticket} href={ticketHref(ticket.id)} />
+              ))
             )}
           </ul>
           {matchingTotal > 0 && (
@@ -142,11 +148,11 @@ function StatCard({
   accent?: string;
 }) {
   return (
-    <div className="min-h-24 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
+    <div className="min-h-20 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
       <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
         {label}
       </p>
-      <p className={`mt-2 text-3xl font-bold ${accent ?? "text-zinc-900 dark:text-zinc-50"}`}>
+      <p className={`mt-1.5 text-3xl font-bold ${accent ?? "text-zinc-900 dark:text-zinc-50"}`}>
         {value}
       </p>
     </div>

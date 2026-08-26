@@ -54,7 +54,7 @@ export function TicketListControls({
         </select>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         <span className="text-sm text-zinc-500 dark:text-zinc-400">
           Page {page} of {totalPages}
         </span>

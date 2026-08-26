@@ -18,7 +18,7 @@ export function SuggestedResponseEditor({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   const [savedValue, setSavedValue] = useState(initialValue);
 
   useEffect(() => {

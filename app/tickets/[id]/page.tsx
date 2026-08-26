@@ -21,14 +21,18 @@ export const dynamic = "force-dynamic";
 
 export default async function TicketDetailsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ from?: string }>;
 }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   if (user.role !== "agent") redirect("/my-tickets");
 
   const { id } = await params;
+  const { from } = await searchParams;
+  const backHref = from ? `/?${from}` : "/";
   const ticket = await prisma.ticket.findUnique({
     where: { id },
     include: { attachments: { omit: { data: true } } },
@@ -64,7 +68,7 @@ export default async function TicketDetailsPage({
     <div className="page-glow min-h-full flex-1 px-4 py-10 sm:px-8 sm:py-14">
       <div className="mx-auto flex max-w-[1180px] flex-col gap-6">
         <Link
-          href="/"
+          href={backHref}
           className="flex items-center gap-1.5 text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-50"
         >
           <svg
