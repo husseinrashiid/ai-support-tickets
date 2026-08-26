@@ -8,7 +8,7 @@ An AI-powered customer support ticket system. Customers submit tickets and messa
 - Submit a ticket (title + message, optional image attachment).
 - On submission, Claude analyzes the ticket in the background and returns a summary, category, priority, and a suggested first response - ticket creation returns immediately rather than waiting on the AI call.
 - Agents can edit and save the suggested response, and retry AI analysis if it failed or the ticket has no category yet.
-- Agent dashboard with ticket counts (open / in progress / completed / total), plus filtering, sorting, and pagination over the ticket list. Filters, sort, and page are preserved when opening a ticket and navigating back.
+- Agent dashboard with ticket counts (open / in progress / resolved / urgent / total), plus filtering, sorting, and pagination over the ticket list. Filters, sort, and page are preserved when opening a ticket and navigating back.
 
 **Authentication and roles**
 - Email/password auth with signed session cookies (`jose` JWT, `bcryptjs` password hashing).

@@ -71,11 +71,12 @@ export default async function Home({
   const ticketHref = (id: string) =>
     `/tickets/${id}${listQueryString ? `?from=${encodeURIComponent(listQueryString)}` : ""}`;
 
-  const [total, open, inProgress, completed, matchingTotal, tickets] = await Promise.all([
+  const [total, open, inProgress, resolved, urgent, matchingTotal, tickets] = await Promise.all([
     prisma.ticket.count(),
     prisma.ticket.count({ where: { status: "Open" } }),
     prisma.ticket.count({ where: { status: "In Progress" } }),
-    prisma.ticket.count({ where: { status: { in: ["Resolved", "Closed"] } } }),
+    prisma.ticket.count({ where: { status: "Resolved" } }),
+    prisma.ticket.count({ where: { priority: "Urgent", status: { not: "Closed" } } }),
     prisma.ticket.count({ where }),
     prisma.ticket.findMany({
       where,
@@ -97,10 +98,11 @@ export default async function Home({
           </h1>
         </header>
 
-        <section className="mb-7 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <section className="mb-7 grid grid-cols-2 gap-4 sm:grid-cols-5">
           <StatCard label="Open" value={open} accent="text-brand-blue/80 dark:text-brand-blue/70" />
           <StatCard label="In Progress" value={inProgress} accent="text-indigo-500/80 dark:text-indigo-400/70" />
-          <StatCard label="Completed" value={completed} accent="text-green-600/80 dark:text-green-500/70" />
+          <StatCard label="Resolved" value={resolved} accent="text-green-600/80 dark:text-green-500/70" />
+          <StatCard label="Urgent" value={urgent} accent="text-red-600/80 dark:text-red-500/70" />
           <StatCard label="Total" value={total} />
         </section>
 
