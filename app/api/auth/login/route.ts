@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSessionToken, setSessionCookie, verifyPassword } from "@/lib/auth";
 import { parseJsonBody } from "@/lib/api-helpers";
-import { getClientIp, isRateLimited } from "@/lib/rate-limit";
+import { clearFailures, getClientIp, getLockoutRemaining, isRateLimited, recordFailure } from "@/lib/rate-limit";
 
 const LOGIN_LIMIT = 10;
 const LOGIN_WINDOW_MS = 5 * 60 * 1000;
+
+const MAX_CONSECUTIVE_FAILURES = 5;
+const LOCKOUT_MS = 5 * 60 * 1000;
 
 export async function POST(request: NextRequest) {
   const ip = getClientIp(request);
@@ -29,6 +32,19 @@ export async function POST(request: NextRequest) {
   }
 
   const normalizedEmail = email.trim().toLowerCase();
+  const failureKey = `login-fail:${ip}:${normalizedEmail}`;
+
+  const lockoutRemaining = getLockoutRemaining(failureKey);
+  if (lockoutRemaining > 0) {
+    return NextResponse.json(
+      {
+        error: `Too many failed attempts. Please try again in ${Math.ceil(
+          lockoutRemaining / 60000
+        )} minute(s).`,
+      },
+      { status: 429 }
+    );
+  }
 
   let user;
   try {
@@ -42,11 +58,14 @@ export async function POST(request: NextRequest) {
   }
 
   if (!user || !(await verifyPassword(password, user.passwordHash))) {
+    recordFailure(failureKey, MAX_CONSECUTIVE_FAILURES, LOCKOUT_MS);
     return NextResponse.json(
       { error: "Invalid email or password." },
       { status: 401 }
     );
   }
+
+  clearFailures(failureKey);
 
   const token = await createSessionToken({
     id: user.id,
