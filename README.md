@@ -39,6 +39,7 @@ An AI-powered customer support ticket system. Customers submit tickets and messa
 npm install
 cp .env.example .env   # then fill in the values below
 npx prisma migrate deploy
+npm run create-agent -- agent@example.com Agent123!
 npm run dev
 ```
 
@@ -67,7 +68,7 @@ The four models are `User`, `Ticket`, `Message`, and `Attachment` (attachments b
 
 ## Test credentials
 
-**Agent** (pre-created, ready to use):
+**Agent** (created by the install step above):
 
 | Email | Password |
 |---|---|
