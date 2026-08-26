@@ -13,6 +13,7 @@ import {
   formatTicketReference,
 } from "@/lib/ticket-display";
 import { MessageThread, type LeadingEntry } from "@/components/MessageThread";
+import { MESSAGE_WRITABLE_STATUSES } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -57,7 +58,11 @@ export default async function CustomerTicketDetailsPage({
     },
   ];
 
-  const hasSentResponse = messages.some((message) => message.senderRole === "agent");
+  const lastMessage = messages[messages.length - 1];
+  const canRespond = MESSAGE_WRITABLE_STATUSES.includes(
+    ticket.status as (typeof MESSAGE_WRITABLE_STATUSES)[number]
+  );
+  const awaitingResponse = canRespond && (!lastMessage || lastMessage.senderRole !== "agent");
 
   return (
     <div className="page-glow min-h-full flex-1 px-4 py-10 sm:px-8 sm:py-14">
@@ -98,7 +103,7 @@ export default async function CustomerTicketDetailsPage({
                 {ticket.priority}
               </span>
             )}
-            {!hasSentResponse && ticket.status !== "Closed" && (
+            {awaitingResponse && (
               <span className="flex items-center gap-1.5 font-medium text-amber-700 dark:text-amber-400">
                 <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
                 Awaiting response
@@ -115,7 +120,7 @@ export default async function CustomerTicketDetailsPage({
               viewerId={user.id}
               initialMessages={messages}
               leadingEntries={leadingEntries}
-              awaitingResponse={!hasSentResponse}
+              awaitingResponse={awaitingResponse}
             />
           </div>
 

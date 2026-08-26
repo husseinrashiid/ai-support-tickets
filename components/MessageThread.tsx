@@ -161,7 +161,7 @@ export const MessageThread = forwardRef<
         )}
       </div>
 
-      {awaitingResponse && status !== "Closed" && (
+      {awaitingResponse && canWrite && (
         <p className="mt-2 flex items-center gap-2 pl-5 text-[13px] text-amber-700/90 dark:text-amber-500/80">
           <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
           Waiting for support response.

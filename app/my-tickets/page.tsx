@@ -17,11 +17,11 @@ export default async function MyTicketsPage() {
   });
 
   return (
-    <div className="flex min-h-full flex-1 flex-col bg-[#f4f5f7] dark:bg-[#08090b]">
+    <div className="page-glow flex min-h-full flex-1 flex-col">
       <div className="mx-auto flex w-[min(1120px,calc(100%-48px))] flex-1 flex-col pt-[42px] pb-14 sm:pb-16">
-        <header className="mb-7 flex items-start justify-between gap-4 border-b border-zinc-200 pb-6 dark:border-zinc-800">
-          <div>
-            <h1 className="text-5xl font-extrabold tracking-tight text-zinc-900 dark:text-[#f5f5f6]">
+        <header className="flex items-start justify-between gap-6 border-b border-zinc-200 pb-[22px] dark:border-zinc-800">
+          <div className="flex flex-col">
+            <h1 className="text-[46px] font-extrabold tracking-tight text-zinc-900 dark:text-[#f5f5f6]">
               My Tickets
               <span className="ml-1 text-brand-blue">.</span>
             </h1>
@@ -32,40 +32,42 @@ export default async function MyTicketsPage() {
           {tickets.length > 0 && (
             <Link
               href="/tickets/new"
-              className="shrink-0 rounded-full bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-blue-dark"
+              className="mt-2 shrink-0 rounded-full bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-blue-dark"
             >
               + New ticket
             </Link>
           )}
         </header>
 
-        {tickets.length === 0 ? (
-          <section className="flex min-h-[320px] flex-col items-center justify-center rounded-2xl border border-zinc-200 bg-white px-6 py-14 text-center shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
-            <div className="mb-[18px] flex h-12 w-12 items-center justify-center rounded-[14px] border border-brand-blue/20 bg-brand-blue/10 text-brand-blue dark:border-brand-blue/25 dark:bg-brand-blue/15 dark:text-sky-400">
-              <TicketIcon />
-            </div>
-            <h2 className="mb-2.5 text-xl font-bold text-zinc-900 dark:text-zinc-50">No tickets yet</h2>
-            <p className="max-w-[440px] text-sm leading-[1.55] text-zinc-500 dark:text-zinc-400">
-              Submit your first support request and track replies from the support team.
-            </p>
-            <Link href="/tickets/new" className="mt-6 rounded-full bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-blue-dark">
-              + Create ticket
-            </Link>
-          </section>
-        ) : (
-          <section className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
-            <div className="hidden grid-cols-[1fr_auto_2.5rem] gap-4 border-b border-zinc-200 bg-zinc-50 px-5 py-3.5 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-400 sm:grid">
-              <span>Ticket</span>
-              <span>Status</span>
-              <span className="text-right">Age</span>
-            </div>
-            <ul className="divide-y divide-zinc-200 dark:divide-zinc-800">
-              {tickets.map((ticket) => (
-                <TicketRow key={ticket.id} ticket={ticket} href={`/my-tickets/${ticket.id}`} />
-              ))}
-            </ul>
-          </section>
-        )}
+        <div className="mt-[30px]">
+          {tickets.length === 0 ? (
+            <section className="flex min-h-[320px] flex-col items-center justify-center rounded-2xl border border-zinc-200 bg-white px-6 py-14 text-center shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
+              <div className="mb-[18px] flex h-12 w-12 items-center justify-center rounded-[14px] border border-brand-blue/20 bg-brand-blue/10 text-brand-blue dark:border-brand-blue/25 dark:bg-brand-blue/15 dark:text-sky-400">
+                <TicketIcon />
+              </div>
+              <h2 className="mb-2.5 text-xl font-bold text-zinc-900 dark:text-zinc-50">No tickets yet</h2>
+              <p className="max-w-[440px] text-sm leading-[1.55] text-zinc-500 dark:text-zinc-400">
+                Submit your first support request and track replies from the support team.
+              </p>
+              <Link href="/tickets/new" className="mt-6 rounded-full bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-blue-dark">
+                + Create ticket
+              </Link>
+            </section>
+          ) : (
+            <section className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
+              <div className="hidden grid-cols-[1fr_auto_2.5rem] gap-4 border-b border-zinc-200 bg-zinc-50 px-5 py-3.5 text-xs font-semibold uppercase tracking-wide text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-300 sm:grid">
+                <span>Ticket</span>
+                <span>Status</span>
+                <span className="text-right">Age</span>
+              </div>
+              <ul className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                {tickets.map((ticket) => (
+                  <TicketRow key={ticket.id} ticket={ticket} href={`/my-tickets/${ticket.id}`} />
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
       </div>
     </div>
   );
