@@ -38,6 +38,7 @@ export function AgentTicketConversation({
       />
       <SuggestedResponseEditor
         ticketId={ticketId}
+        status={status}
         initialValue={aiInitialValue}
         onUseReply={(text) => threadRef.current?.useReply(text)}
       />

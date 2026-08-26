@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 
 export function SuggestedResponseEditor({
   ticketId,
+  status,
   initialValue,
   onUseReply,
 }: {
   ticketId: string;
+  status: string;
   initialValue: string;
   onUseReply: (text: string) => void;
 }) {
@@ -20,6 +22,7 @@ export function SuggestedResponseEditor({
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(true);
   const [savedValue, setSavedValue] = useState(initialValue);
+  const isClosed = status === "Closed";
 
   useEffect(() => {
     // Re-syncs the local draft when the server gives us a fresh initialValue
@@ -125,7 +128,7 @@ export function SuggestedResponseEditor({
               setStatusMessage(null);
             }}
             rows={3}
-            disabled={regenerating || saving}
+            disabled={regenerating || saving || isClosed}
             placeholder="No AI suggested response yet — write one manually."
             className="min-h-[68px] w-full resize-y rounded-xl border border-zinc-400 bg-white px-3 py-2 text-sm text-zinc-700 outline-none transition-colors placeholder:text-zinc-400 focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/30 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:placeholder:text-zinc-500"
           />
@@ -144,7 +147,7 @@ export function SuggestedResponseEditor({
               <button
                 type="button"
                 onClick={handleRegenerate}
-                disabled={regenerating || saving}
+                disabled={regenerating || saving || isClosed}
                 className="shrink-0 rounded-full border border-zinc-300 px-3.5 py-1.5 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800"
               >
                 {regenerating ? "Regenerating…" : "Regenerate"}
@@ -152,7 +155,7 @@ export function SuggestedResponseEditor({
               <button
                 type="button"
                 onClick={handleSave}
-                disabled={regenerating || saving || !dirty}
+                disabled={regenerating || saving || !dirty || isClosed}
                 className="shrink-0 rounded-full border border-zinc-300 px-3.5 py-1.5 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800"
               >
                 {saving ? "Saving…" : "Save draft"}
@@ -160,7 +163,7 @@ export function SuggestedResponseEditor({
               <button
                 type="button"
                 onClick={handleUseReply}
-                disabled={regenerating || saving || !value.trim()}
+                disabled={regenerating || saving || !value.trim() || isClosed}
                 className="shrink-0 rounded-full bg-brand-blue px-4 py-1.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-400 dark:disabled:bg-[#27313a] dark:disabled:text-[#7f8a96]"
               >
                 Use this reply
