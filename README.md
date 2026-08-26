@@ -22,6 +22,7 @@ An AI-powered customer support ticket system. Customers submit tickets and messa
 - Customers can add follow-up messages only while a ticket is `Open` or `In Progress`; `Resolved`/`Closed` tickets are read-only for customers.
 - Agents can reply through the same thread and ask the AI to draft or regenerate a reply based on the full conversation so far, not just the original message.
 - Messages support one optional image attachment (JPG/PNG/GIF/WEBP, up to 8MB), stored in the database and served back through an authorized endpoint.
+- The AI-suggested response is an internal draft for the agent only; the customer sees the agent's actual reply once it's sent as a message in the conversation, not the raw draft field.
 
 ## Technology stack
 
