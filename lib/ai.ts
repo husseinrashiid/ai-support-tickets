@@ -85,33 +85,42 @@ Respond with only a JSON object matching this exact shape - no prose, no markdow
 {"summary": "...", "category": "...", "priority": "...", "suggestedResponse": "..."}`;
 }
 
-export async function analyzeTicket(title: string, message: string): Promise<AiAnalysisResult> {
+type RawAiResult =
+  | { ok: true; data: unknown }
+  | { ok: false; error: string };
+
+async function requestAiJson(
+  systemPrompt: string,
+  userContent: string,
+  schema: { [key: string]: unknown },
+  messages: { requestFailed: string; refused: string; parseFailed: string }
+): Promise<RawAiResult> {
   let response;
   try {
     response = await client.messages.create(
       {
         model: "claude-haiku-4-5",
         max_tokens: 1024,
-        system: buildSystemPrompt(),
+        system: systemPrompt,
         messages: [
           {
             role: "user",
-            content: `Ticket title: ${title}\n\nCustomer message: ${message}`,
+            content: userContent,
           },
         ],
         output_config: {
-          format: { type: "json_schema", schema: RESPONSE_SCHEMA },
+          format: { type: "json_schema", schema },
         },
       },
       { timeout: 30_000 }
     );
   } catch (error) {
-    console.error("AI analysis request failed:", error);
+    console.error(messages.requestFailed, error);
     return { ok: false, error: "The AI request failed or the AI service is unavailable." };
   }
 
   if (response.stop_reason === "refusal") {
-    return { ok: false, error: "The AI declined to analyze this ticket." };
+    return { ok: false, error: messages.refused };
   }
 
   const textBlock = response.content.find((block) => block.type === "text");
@@ -119,20 +128,34 @@ export async function analyzeTicket(title: string, message: string): Promise<AiA
     return { ok: false, error: "The AI response did not contain any text." };
   }
 
-  let parsed: unknown;
   try {
     const raw = textBlock.text
       .trim()
       .replace(/^```(?:json)?/, "")
       .replace(/```$/, "")
       .trim();
-    parsed = JSON.parse(raw);
+    return { ok: true, data: JSON.parse(raw) };
   } catch (error) {
-    console.error("Failed to parse AI response as JSON:", error, textBlock.text);
+    console.error(messages.parseFailed, error, textBlock.text);
     return { ok: false, error: "The AI response could not be parsed." };
   }
+}
 
-  return validateAnalysis(parsed);
+export async function analyzeTicket(title: string, message: string): Promise<AiAnalysisResult> {
+  const result = await requestAiJson(
+    buildSystemPrompt(),
+    `Ticket title: ${title}\n\nCustomer message: ${message}`,
+    RESPONSE_SCHEMA,
+    {
+      requestFailed: "AI analysis request failed:",
+      refused: "The AI declined to analyze this ticket.",
+      parseFailed: "Failed to parse AI response as JSON:",
+    }
+  );
+
+  if (!result.ok) return result;
+
+  return validateAnalysis(result.data);
 }
 
 function validateAnalysis(value: unknown): AiAnalysisResult {
@@ -172,6 +195,21 @@ function validateAnalysis(value: unknown): AiAnalysisResult {
   };
 }
 
+/** Maps an analysis result to the Prisma ticket fields it should populate. */
+export function analysisToTicketUpdate(analysis: AiAnalysisResult) {
+  return analysis.ok
+    ? {
+        aiSummary: analysis.data.summary,
+        category: analysis.data.category,
+        priority: analysis.data.priority,
+        aiSuggestedResponse: analysis.data.suggestedResponse,
+      }
+    : {
+        aiSummary:
+          "AI analysis could not be completed. The ticket was saved without AI-generated information.",
+      };
+}
+
 function buildReplySystemPrompt(): string {
   const articles = formatArticles();
 
@@ -197,57 +235,24 @@ export async function generateReply(
     ...conversation.map((turn) => `${turn.role === "agent" ? "Support agent" : "Customer"}: ${turn.content}`),
   ].join("\n\n");
 
-  let response;
-  try {
-    response = await client.messages.create(
-      {
-        model: "claude-haiku-4-5",
-        max_tokens: 1024,
-        system: buildReplySystemPrompt(),
-        messages: [
-          {
-            role: "user",
-            content: `Ticket title: ${title}\n\nConversation so far:\n\n${transcript}`,
-          },
-        ],
-        output_config: {
-          format: { type: "json_schema", schema: REPLY_SCHEMA },
-        },
-      },
-      { timeout: 30_000 }
-    );
-  } catch (error) {
-    console.error("AI reply request failed:", error);
-    return { ok: false, error: "The AI request failed or the AI service is unavailable." };
-  }
+  const result = await requestAiJson(
+    buildReplySystemPrompt(),
+    `Ticket title: ${title}\n\nConversation so far:\n\n${transcript}`,
+    REPLY_SCHEMA,
+    {
+      requestFailed: "AI reply request failed:",
+      refused: "The AI declined to draft a reply.",
+      parseFailed: "Failed to parse AI reply response as JSON:",
+    }
+  );
 
-  if (response.stop_reason === "refusal") {
-    return { ok: false, error: "The AI declined to draft a reply." };
-  }
+  if (!result.ok) return result;
 
-  const textBlock = response.content.find((block) => block.type === "text");
-  if (!textBlock || textBlock.type !== "text") {
-    return { ok: false, error: "The AI response did not contain any text." };
-  }
-
-  let parsed: unknown;
-  try {
-    const raw = textBlock.text
-      .trim()
-      .replace(/^```(?:json)?/, "")
-      .replace(/```$/, "")
-      .trim();
-    parsed = JSON.parse(raw);
-  } catch (error) {
-    console.error("Failed to parse AI reply response as JSON:", error, textBlock.text);
-    return { ok: false, error: "The AI response could not be parsed." };
-  }
-
-  if (typeof parsed !== "object" || parsed === null) {
+  if (typeof result.data !== "object" || result.data === null) {
     return { ok: false, error: "The AI response was not a JSON object." };
   }
 
-  const { suggestedResponse } = parsed as Record<string, unknown>;
+  const { suggestedResponse } = result.data as Record<string, unknown>;
   if (typeof suggestedResponse !== "string" || suggestedResponse.trim().length === 0) {
     return { ok: false, error: "The AI response is missing a valid suggested response." };
   }

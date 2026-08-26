@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { analyzeTicket } from "@/lib/ai";
+import { analysisToTicketUpdate, analyzeTicket } from "@/lib/ai";
 import { validateAttachmentFile, type AttachmentInput } from "@/lib/attachments";
 import { requireUser, parseFormData } from "@/lib/api-helpers";
 
@@ -84,31 +84,24 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // The ticket is already saved at this point,an AI failure below must never lose it. analyzeTicket() never throws;instead it will return { ok: false }.
-  const analysis = await analyzeTicket(ticket.title, ticket.message);
+  // The ticket is already saved at this point, so AI analysis runs after the
+  // response is sent instead of blocking ticket creation on it. analyzeTicket()
+  // never throws - a failure just leaves the fallback aiSummary from
+  // analysisToTicketUpdate(); the UI already treats a missing category/summary
+  // as pending review, with a manual retry available on the ticket page.
+  after(async () => {
+    const analysis = await analyzeTicket(ticket.title, ticket.message);
+    const updateData = analysisToTicketUpdate(analysis);
 
-  const updateData = analysis.ok
-    ? {
-        aiSummary: analysis.data.summary,
-        category: analysis.data.category,
-        priority: analysis.data.priority,
-        aiSuggestedResponse: analysis.data.suggestedResponse,
-      }
-    : {
-        aiSummary:
-          "AI analysis could not be completed. The ticket was saved without AI-generated information.",
-      };
-  
-//try and catch for failure
-  let finalTicket = ticket;
-  try {
-    finalTicket = await prisma.ticket.update({
-      where: { id: ticket.id },
-      data: updateData,
-    });
-  } catch (error) {
-    console.error(`Failed to save AI analysis for ticket ${ticket.id}:`, error);
-  }
+    try {
+      await prisma.ticket.update({
+        where: { id: ticket.id },
+        data: updateData,
+      });
+    } catch (error) {
+      console.error(`Failed to save AI analysis for ticket ${ticket.id}:`, error);
+    }
+  });
 
-  return NextResponse.json({ ticket: finalTicket }, { status: 201 });
+  return NextResponse.json({ ticket }, { status: 201 });
 }
