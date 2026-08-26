@@ -14,7 +14,7 @@ An AI-powered customer support ticket system. Customers submit tickets and messa
 - Email/password auth with signed session cookies (`jose` JWT, `bcryptjs` password hashing).
 - Login is rate-limited, and an account is locked out for 5 minutes after 5 consecutive failed login attempts from the same IP.
 - Two roles: **customer** (owns and manages only their own tickets) and **agent** (sees and manages every ticket).
-- Public registration always creates a customer account — agent accounts can't be self-registered, only provisioned via a CLI script (see below).
+- Public registration always creates a customer account — agent accounts can't be self-registered, only provisioned via the `create-agent` script.
 - Every API route and page re-checks the session and role server-side; hiding a link in the UI is never the only guard.
 
 **Ticket conversation**
@@ -76,15 +76,7 @@ The four models are `User`, `Ticket`, `Message`, and `Attachment` (attachments b
 
 **Customer:** there's no fixed account — register your own at `/register` (tickets are scoped to whichever customer creates them, so a fresh account is the natural way to test the customer flow).
 
-## Create an agent account
-
-Agent accounts cannot be created through public registration. To create another one:
-
-```bash
-npm run create-agent -- <email> <password>
-```
-
-The script hashes the password and upserts a user with `role: "agent"` directly into the database.
+To create additional agent accounts, rerun `npm run create-agent -- <email> <password>`.
 
 ## Sample data
 
