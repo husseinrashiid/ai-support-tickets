@@ -14,19 +14,20 @@ export async function GET(
   if (user instanceof NextResponse) return user;
 
   try {
-    const ticket = await prisma.ticket.findUnique({ where: { id } });
+    const [ticket, messages] = await Promise.all([
+      prisma.ticket.findUnique({ where: { id } }),
+      prisma.message.findMany({
+        where: { ticketId: id },
+        orderBy: { createdAt: "asc" },
+        // The UI only ever needs id/filename (it loads the actual image via
+        // /api/attachments/[id]), so leave the attachment bytes out of this payload.
+        include: { attachments: { omit: { data: true } } },
+      }),
+    ]);
 
     if (!ticket || isForbiddenForCustomer(user, ticket.ownerId)) {
       return NextResponse.json({ error: "Ticket not found." }, { status: 404 });
     }
-
-    const messages = await prisma.message.findMany({
-      where: { ticketId: id },
-      orderBy: { createdAt: "asc" },
-      // The UI only ever needs id/filename (it loads the actual image via
-      // /api/attachments/[id]), so leave the attachment bytes out of this payload.
-      include: { attachments: { omit: { data: true } } },
-    });
 
     return NextResponse.json({ messages });
   } catch (error) {

@@ -33,20 +33,21 @@ export default async function TicketDetailsPage({
   const { id } = await params;
   const { from } = await searchParams;
   const backHref = from ? `/?${from}` : "/";
-  const ticket = await prisma.ticket.findUnique({
-    where: { id },
-    include: { attachments: { omit: { data: true } } },
-  });
+  const [ticket, messages] = await Promise.all([
+    prisma.ticket.findUnique({
+      where: { id },
+      include: { attachments: { omit: { data: true } } },
+    }),
+    prisma.message.findMany({
+      where: { ticketId: id },
+      orderBy: { createdAt: "asc" },
+      include: { attachments: { omit: { data: true } } },
+    }),
+  ]);
 
   if (!ticket) {
     notFound();
   }
-
-  const messages = await prisma.message.findMany({
-    where: { ticketId: id },
-    orderBy: { createdAt: "asc" },
-    include: { attachments: { omit: { data: true } } },
-  });
 
   const priorityStyle = ticket.priority
     ? PRIORITY_STYLES[ticket.priority] ?? DEFAULT_PRIORITY_STYLE
