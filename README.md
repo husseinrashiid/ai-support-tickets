@@ -8,10 +8,11 @@ An AI-powered customer support ticket system. Customers submit tickets and messa
 - Submit a ticket (title + message, optional image attachment).
 - On submission, Claude analyzes the ticket and returns a summary, category, priority, and a suggested first response.
 - Agents can edit and save the suggested response, and retry AI analysis if it failed or the ticket has no category yet.
-- Agent dashboard with ticket counts (total / open / resolved / urgent), plus filtering, sorting, and pagination over the ticket list.
+- Agent dashboard with ticket counts (open / in progress / completed / total), plus filtering, sorting, and pagination over the ticket list. Filters, sort, and page are preserved when opening a ticket and navigating back.
 
 **Authentication and roles**
 - Email/password auth with signed session cookies (`jose` JWT, `bcryptjs` password hashing).
+- Login is rate-limited, and an account is locked out for 5 minutes after 5 consecutive failed login attempts from the same IP.
 - Two roles: **customer** (owns and manages only their own tickets) and **agent** (sees and manages every ticket).
 - Public registration always creates a customer account — agent accounts can't be self-registered, only provisioned via a CLI script (see below).
 - Every API route and page re-checks the session and role server-side; hiding a link in the UI is never the only guard.
@@ -143,7 +144,7 @@ If the AI request times out, is refused, or returns invalid data:
 - Attachments are stored directly in PostgreSQL rather than object storage.
 - Long conversations are sent to the AI in full and are not summarized or truncated yet.
 - No automated test suite yet.
-- Login/register rate limiting is an in-memory, per-process counter (`lib/rate-limit.ts`) — fine for a single instance, but resets on restart and wouldn't be shared across multiple instances behind a load balancer.
+- Login/register rate limiting and the login lockout counter are in-memory, per-process state (`lib/rate-limit.ts`) — fine for a single instance, but resets on restart and wouldn't be shared across multiple instances behind a load balancer.
 
 ## Possible future improvements
 
@@ -152,7 +153,6 @@ If the AI request times out, is refused, or returns invalid data:
 - Object storage (e.g. S3) for attachments instead of storing bytes in Postgres, for larger files.
 - Real-time conversation updates (polling or websockets) instead of a manual refresh after sending a message.
 - Multiple attachments per message instead of one.
-- Automated test suite (unit and integration tests).
 
 ## Repository notes
 
