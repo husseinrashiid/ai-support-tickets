@@ -2,11 +2,27 @@
 
 An AI-powered customer support ticket system. Customers submit tickets and message with support agents; agents triage tickets with AI-generated summaries, categories, priorities, and suggested replies.
 
-## Main features
+![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js) ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Prisma-4169E1?logo=postgresql&logoColor=white) ![Anthropic](https://img.shields.io/badge/AI-Claude-D97757)
+
+## Table of contents
+
+- [Features](#features)
+- [Technology stack](#technology-stack)
+- [Getting started](#getting-started)
+- [Environment variables](#environment-variables)
+- [Database](#database)
+- [Test credentials](#test-credentials)
+- [How it works](#how-it-works)
+- [AI integration](#ai-integration)
+- [Known limitations](#known-limitations)
+- [Roadmap](#roadmap)
+- [Repository notes](#repository-notes)
+
+## Features
 
 **Core ticket flow**
 - Submit a ticket (title + message, optional image attachment).
-- On submission, Claude analyzes the ticket in the background and returns a summary, category, priority, and a suggested first response - ticket creation returns immediately rather than waiting on the AI call.
+- On submission, Claude analyzes the ticket in the background and returns a summary, category, priority, and a suggested first response — ticket creation returns immediately rather than waiting on the AI call.
 - Agents can edit and save the suggested response, and retry AI analysis if it failed or the ticket has no category yet.
 - Agent dashboard with ticket counts (open / in progress / resolved / urgent / total), plus filtering, sorting, and pagination over the ticket list. Filters, sort, and page are preserved when opening a ticket and navigating back.
 
@@ -26,13 +42,15 @@ An AI-powered customer support ticket system. Customers submit tickets and messa
 
 ## Technology stack
 
-- **Frontend:** Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4
-- **Backend:** Next.js API routes
-- **Database:** PostgreSQL via Prisma ORM
-- **Auth:** `jose` (JWT session cookies), `bcryptjs` (password hashing)
-- **AI:** Anthropic API (`@anthropic-ai/sdk`), model `claude-haiku-4-5`
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4 |
+| Backend | Next.js API routes |
+| Database | PostgreSQL via Prisma ORM |
+| Auth | `jose` (JWT session cookies), `bcryptjs` (password hashing) |
+| AI | Anthropic API (`@anthropic-ai/sdk`), model `claude-haiku-4-5` |
 
-## Local installation
+## Getting started
 
 **Requirements:** Node.js 18+, a PostgreSQL database, an Anthropic API key.
 
@@ -56,7 +74,7 @@ Set these in `.env` (see `.env.example`):
 | `ANTHROPIC_API_KEY` | Anthropic API key, used server-side only |
 | `AUTH_SECRET` | Random secret used to sign session JWTs (e.g. `openssl rand -base64 32`) |
 
-## Database setup
+## Database
 
 The schema lives in `prisma/schema.prisma`; migrations are in `prisma/migrations/`.
 
@@ -79,9 +97,7 @@ The four models are `User`, `Ticket`, `Message`, and `Attachment` (attachments b
 
 To create additional agent accounts, rerun `npm run create-agent -- <email> <password>`.
 
-## Sample data
-
-No seed script is included — the app is fully usable from an empty database: register a customer account, submit a ticket (AI analysis runs automatically), then log in as the agent above to triage it. Nothing is gated behind data you can't produce yourself through the UI.
+No seed script is included — the app is fully usable from an empty database: register a customer account, submit a ticket (AI analysis runs automatically), then log in as the agent above to triage it.
 
 ## How it works
 
@@ -109,21 +125,15 @@ The response is constrained to structured JSON and validated before being stored
 
 ### Conversation replies
 
-Agents can generate suggested replies using the full ticket conversation so far.
-
-The prompt includes the original ticket and all persisted customer/agent messages, allowing the suggestion to reflect later context rather than only the initial request.
+Agents can generate suggested replies using the full ticket conversation so far. The prompt includes the original ticket and all persisted customer/agent messages, allowing the suggestion to reflect later context rather than only the initial request.
 
 ### Support knowledge
 
-Five support articles from `lib/support-articles.json` are included directly in the system prompts.
-
-There is currently no retrieval or embedding pipeline because the knowledge base is small enough to send in full.
+Five support articles from `lib/support-articles.json` are included directly in the system prompts. There is currently no retrieval or embedding pipeline because the knowledge base is small enough to send in full.
 
 ### Failure handling
 
-AI failure never prevents ticket creation.
-
-If the AI request times out, is refused, or returns invalid data:
+AI failure never prevents ticket creation. If the AI request times out, is refused, or returns invalid data:
 
 - the ticket is still stored
 - fallback values are used where needed
@@ -140,7 +150,7 @@ If the AI request times out, is refused, or returns invalid data:
 - No automated test suite yet.
 - Login/register rate limiting and the login lockout counter are in-memory, per-process state (`lib/rate-limit.ts`) — fine for a single instance, but resets on restart and wouldn't be shared across multiple instances behind a load balancer.
 
-## Possible future improvements
+## Roadmap
 
 - Password reset flow.
 - Two-factor authentication (2FA), especially for agent accounts.
